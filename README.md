@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Rocky Shore Detailing
 
-## Getting Started
+Cinematic single-page site for **Rocky Shore Detailing** — a Maine-statewide mobile auto-detailing studio run by Aiden Quinn.
 
-First, run the development server:
+## Quick start
 
 ```bash
+npm install
+cp .env.example .env.local
+# edit .env.local — at minimum set RESEND_API_KEY
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Site runs at `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Var | Required? | Default | Notes |
+|---|---|---|---|
+| `RESEND_API_KEY` | yes | — | Get one free at https://resend.com (3,000 emails/mo). Without this, booking submissions return 502. |
+| `BOOKING_TO_EMAIL` | no | `fumarajohn8@gmail.com` | Where bookings land. |
+| `BOOKING_FROM_EMAIL` | no | `Rocky Shore Bookings <onboarding@resend.dev>` | Resend's testing sender until you verify a custom domain at https://resend.com/domains. |
 
-## Learn More
+## Editing content (no code knowledge needed)
 
-To learn more about Next.js, take a look at the following resources:
+All editable text + images live in `src/data/`:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `services.ts` — the 5 service cards. Add `priceFrom: "$185"` to any card to surface a price; omit to show "Request a quote".
+- `process-steps.ts` — the 5 process steps shown in the pinned horizontal scroll.
+- `testimonials.ts` — quote cards in the marquee.
+- `faq.ts` — accordion questions.
+- `gallery.ts` — before/after image URLs and the 6-tile grid. Drop your own JPGs in `public/gallery/` and reference like `src: "/gallery/my-photo.jpg"`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+To change phone, email, IG, hours: edit `src/components/footer.tsx`.
 
-## Deploy on Vercel
+## Deploying
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The site deploys cleanly to Vercel:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm i -g vercel
+vercel
+```
+
+Set the env vars in the Vercel dashboard or via `vercel env add RESEND_API_KEY`.
+
+## Tech stack
+
+Next.js 16 App Router · React 19 · TypeScript · Tailwind v4 · GSAP + ScrollTrigger · Framer Motion · Three.js / R3F · Theatre.js · Lenis smooth scroll · React Hook Form + Zod · Resend.
+
+## Scripts
+
+```bash
+npm run dev      # development
+npm run build    # production build
+npm run start    # serve production build
+npm run lint     # ESLint
+```
