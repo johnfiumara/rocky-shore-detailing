@@ -1,3 +1,4 @@
+import Hero from "@/components/hero/hero";
 import StorySection from "@/components/story-section";
 import ServicesSection from "@/components/services-section";
 import ProcessSection from "@/components/process-section";
@@ -9,6 +10,7 @@ import FaqSection from "@/components/faq-section";
 export default function Page() {
   return (
     <>
+      <Hero />
       <StorySection />
       <ServicesSection />
       <ProcessSection />
