@@ -2,7 +2,7 @@
 
 import { Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
-import { Environment, PerspectiveCamera } from "@react-three/drei";
+import { PerspectiveCamera } from "@react-three/drei";
 import ChromeParticles from "./chrome-particles";
 
 function StaticFallback() {
@@ -23,15 +23,15 @@ export default function HeroCanvas() {
     <div aria-hidden className="absolute inset-0">
       <Suspense fallback={<StaticFallback />}>
         <Canvas
-          dpr={[1, 2]}
+          dpr={[1, 1.75]}
           gl={{ antialias: true, powerPreference: "high-performance" }}
-          style={{ background: "transparent" }}
+          style={{ background: "#0a0b0d" }}
         >
+          <color attach="background" args={["#0a0b0d"]} />
           <PerspectiveCamera makeDefault position={[0, 0, 6]} fov={55} />
-          <ambientLight intensity={0.3} />
-          <directionalLight position={[5, 4, 5]} intensity={0.9} color="#e9c894" />
-          <directionalLight position={[-4, -2, -3]} intensity={0.4} color="#3c7a89" />
-          <Environment preset="warehouse" />
+          <ambientLight intensity={0.45} />
+          <directionalLight position={[5, 4, 5]} intensity={1.1} color="#e9c894" />
+          <directionalLight position={[-4, -2, -3]} intensity={0.5} color="#3c7a89" />
           <ChromeParticles />
         </Canvas>
       </Suspense>

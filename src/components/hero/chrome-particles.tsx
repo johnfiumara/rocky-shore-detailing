@@ -49,13 +49,13 @@ export default function ChromeParticles() {
 
   return (
     <instancedMesh ref={meshRef} args={[undefined, undefined, COUNT]}>
-      <sphereGeometry args={[1, 12, 12]} />
+      <sphereGeometry args={[1, 8, 8]} />
       <meshStandardMaterial
         color="#e9c894"
-        metalness={1}
-        roughness={0.25}
+        metalness={0.55}
+        roughness={0.32}
         emissive="#c9a36b"
-        emissiveIntensity={0.18}
+        emissiveIntensity={0.55}
       />
     </instancedMesh>
   );
