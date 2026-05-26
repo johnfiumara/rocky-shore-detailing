@@ -3,6 +3,7 @@ import { Fraunces, Instrument_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 import SmoothScroll from "@/components/smooth-scroll";
+import MotionProvider from "@/components/motion-provider";
 import Cursor from "@/components/cursor";
 import Navigation from "@/components/navigation";
 import Footer from "@/components/footer";
@@ -55,12 +56,14 @@ export default function RootLayout({
       className={`${fraunces.variable} ${instrument.variable} ${jetbrains.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-ink text-bone grain vignette has-cursor">
-        <SmoothScroll>
-          <Cursor />
-          <Navigation />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </SmoothScroll>
+        <MotionProvider>
+          <SmoothScroll>
+            <Cursor />
+            <Navigation />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </SmoothScroll>
+        </MotionProvider>
       </body>
     </html>
   );
