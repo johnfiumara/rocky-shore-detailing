@@ -1,19 +1,36 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+
+const subscribePointerFine = (callback: () => void) => {
+  const mql = window.matchMedia("(pointer: fine)");
+  mql.addEventListener("change", callback);
+  return () => mql.removeEventListener("change", callback);
+};
+const getPointerFine = () => window.matchMedia("(pointer: fine)").matches;
+
+const subscribeNoReducedMotion = (callback: () => void) => {
+  const mql = window.matchMedia("(prefers-reduced-motion: no-preference)");
+  mql.addEventListener("change", callback);
+  return () => mql.removeEventListener("change", callback);
+};
+const getNoReducedMotion = () =>
+  window.matchMedia("(prefers-reduced-motion: no-preference)").matches;
+
+const serverSnapshot = () => false;
 
 export default function Cursor() {
   const dotRef = useRef<HTMLDivElement | null>(null);
   const ringRef = useRef<HTMLDivElement | null>(null);
-  const [enabled, setEnabled] = useState(false);
   const [hover, setHover] = useState(false);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const fine = window.matchMedia("(pointer: fine)").matches;
-    const noPref = window.matchMedia("(prefers-reduced-motion: no-preference)").matches;
-    setEnabled(fine && noPref);
-  }, []);
+  const fine = useSyncExternalStore(subscribePointerFine, getPointerFine, serverSnapshot);
+  const noPref = useSyncExternalStore(
+    subscribeNoReducedMotion,
+    getNoReducedMotion,
+    serverSnapshot,
+  );
+  const enabled = fine && noPref;
 
   useEffect(() => {
     if (!enabled) return;
