@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Reveal from "@/components/reveal";
 import BeforeAfter from "@/components/before-after";
-import { beforeAfter, galleryGrid } from "@/data/gallery";
+import { beforeAfterPair as beforeAfter, galleryGrid } from "@/data/gallery";
 
 export default function GallerySection() {
   return (

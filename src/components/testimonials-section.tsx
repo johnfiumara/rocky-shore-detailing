@@ -1,8 +1,24 @@
 import Marquee from "@/components/marquee";
 import Reveal from "@/components/reveal";
-import { testimonials } from "@/data/testimonials";
+import { prisma } from "@/lib/prisma";
+import { testimonials as staticTestimonials } from "@/data/testimonials";
 
-function Quote({ quote, name, context }: { quote: string; name: string; context: string }) {
+type QuoteData = { quote: string; name: string; context: string };
+
+async function getTestimonials(): Promise<QuoteData[]> {
+  try {
+    const rows = await prisma.testimonial.findMany({
+      where: { published: true },
+      orderBy: { sortOrder: "asc" },
+    });
+    if (rows.length > 0) return rows;
+  } catch {
+    // DB not available — fall through to static data
+  }
+  return staticTestimonials;
+}
+
+function Quote({ quote, name, context }: QuoteData) {
   return (
     <figure className="w-[420px] md:w-[480px] shrink-0 rounded-2xl border border-line bg-charcoal/40 backdrop-blur p-8">
       <blockquote className="font-display italic text-2xl text-bone leading-snug">
@@ -17,9 +33,11 @@ function Quote({ quote, name, context }: { quote: string; name: string; context:
   );
 }
 
-export default function TestimonialsSection() {
+export default async function TestimonialsSection() {
+  const testimonials = await getTestimonials();
   const rowA = testimonials.slice(0, 3);
   const rowB = testimonials.slice(3);
+
   return (
     <section aria-labelledby="testimonials-h" className="relative py-32 md:py-44 border-t border-line overflow-hidden">
       <div className="mx-auto max-w-7xl px-6 mb-16">

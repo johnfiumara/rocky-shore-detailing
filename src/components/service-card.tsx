@@ -2,9 +2,13 @@
 
 import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
-import type { Service } from "@/data/services";
+type ServiceCardData = {
+  slug: string;
+  title: string;
+  tiers: { size: string; price: number }[];
+};
 
-export default function ServiceCard({ service }: { service: Service }) {
+export default function ServiceCard({ service }: { service: ServiceCardData }) {
   return (
     <motion.a
       href={`#book?service=${service.slug}`}

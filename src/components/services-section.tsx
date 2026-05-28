@@ -1,8 +1,25 @@
 import Reveal from "@/components/reveal";
 import ServiceCard from "@/components/service-card";
-import { services } from "@/data/services";
+import { prisma } from "@/lib/prisma";
+import { services as staticServices } from "@/data/services";
 
-export default function ServicesSection() {
+async function getServices() {
+  try {
+    const rows = await prisma.service.findMany({
+      where: { active: true },
+      orderBy: { sortOrder: "asc" },
+      include: { tiers: { orderBy: { size: "asc" } } },
+    });
+    if (rows.length > 0) return rows;
+  } catch {
+    // DB not available — fall through to static data
+  }
+  return staticServices;
+}
+
+export default async function ServicesSection() {
+  const services = await getServices();
+
   return (
     <section id="services" aria-labelledby="services-h" className="relative py-32 md:py-44 border-t border-line">
       <div className="mx-auto max-w-7xl px-6">

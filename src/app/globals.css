@@ -52,6 +52,7 @@
   --color-pearl: var(--rs-pearl);
   --color-line: var(--rs-line);
   --color-line-strong: var(--rs-line-strong);
+  --color-surface: var(--rs-charcoal);
 
   --font-display: var(--font-fraunces);
   --font-sans: var(--font-instrument);

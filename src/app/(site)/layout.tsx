@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Instrument_Sans, JetBrains_Mono } from "next/font/google";
-import "./globals.css";
+import "../globals.css";
 
 import SmoothScroll from "@/components/smooth-scroll";
 import MotionProvider from "@/components/motion-provider";
@@ -37,8 +37,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://rockyshoredetailing.com"),
   openGraph: {
     title: "Rocky Shore Detailing",
-    description:
-      "Hand-crafted mobile auto detailing by Aiden Quinn. Statewide Maine.",
+    description: "Hand-crafted mobile auto detailing by Aiden Quinn. Statewide Maine.",
     type: "website",
   },
 };
@@ -47,9 +46,7 @@ export const viewport: Viewport = {
   themeColor: "#0a0b0d",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="en"

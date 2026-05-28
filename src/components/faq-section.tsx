@@ -1,8 +1,28 @@
 import Reveal from "@/components/reveal";
 import FaqItem from "@/components/faq-item";
-import { faq } from "@/data/faq";
+import { prisma } from "@/lib/prisma";
+import { faq as staticFaq } from "@/data/faq";
 
-export default function FaqSection() {
+type FaqRow = { q: string; a: string };
+
+async function getFaq(): Promise<FaqRow[]> {
+  try {
+    const rows = await prisma.faqItem.findMany({
+      where: { published: true },
+      orderBy: { sortOrder: "asc" },
+    });
+    if (rows.length > 0) {
+      return rows.map((r) => ({ q: r.question, a: r.answer }));
+    }
+  } catch {
+    // DB not available — fall through to static data
+  }
+  return staticFaq;
+}
+
+export default async function FaqSection() {
+  const faq = await getFaq();
+
   return (
     <section id="faq" aria-labelledby="faq-h" className="relative py-32 md:py-44 border-t border-line">
       <div className="mx-auto max-w-5xl px-6">

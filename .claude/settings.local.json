@@ -26,7 +26,21 @@
       "Bash(echo \"lint-edited real-file exit: $?\")",
       "Bash(node .claude/hooks/block-env-edits.mjs)",
       "Bash(echo \"block-env normal-file exit: $?\")",
-      "Bash(echo \"block-env .env-file exit: $?\")"
+      "Bash(echo \"block-env .env-file exit: $?\")",
+      "Bash(where netlify *)",
+      "Bash(netlify --version)",
+      "Bash(npx --yes netlify-cli@latest --version)",
+      "Bash(npx --yes netlify-cli@latest status)",
+      "Bash(npx --yes netlify-cli@latest sites:list --json)",
+      "Bash(python -c \"import json,sys; data=json.load\\(sys.stdin\\); [print\\(f\\\\\"{s['name']}\\\\t{s['default_domain']}\\\\t{s['id']}\\\\\"\\) for s in data]\")",
+      "Bash(npx --yes netlify-cli@latest deploy --prod --build)",
+      "mcp__e72aefc7-06af-4a2f-a0cd-bc311f1267c2__list_projects",
+      "mcp__e72aefc7-06af-4a2f-a0cd-bc311f1267c2__list_organizations",
+      "mcp__e72aefc7-06af-4a2f-a0cd-bc311f1267c2__confirm_cost",
+      "mcp__e72aefc7-06af-4a2f-a0cd-bc311f1267c2__create_project",
+      "mcp__e72aefc7-06af-4a2f-a0cd-bc311f1267c2__get_cost",
+      "mcp__e72aefc7-06af-4a2f-a0cd-bc311f1267c2__get_project",
+      "Bash(npm install *)"
     ]
   }
 }

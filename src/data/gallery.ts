@@ -1,33 +1,79 @@
 export type GalleryImage = {
   src: string;
   alt: string;
+  isBefore?: boolean;
+  isAfter?: boolean;
 };
+
+export type VehicleGallery = {
+  slug: string;
+  label: string;
+  year: number;
+  make: string;
+  model: string;
+  color: string;
+  images: GalleryImage[];
+};
+
+export const vehicles: VehicleGallery[] = [
+  {
+    slug: "brown-truck",
+    label: "2019 Ford F-150 · Gorham",
+    year: 2019,
+    make: "Ford",
+    model: "F-150",
+    color: "Brown",
+    images: [
+      {
+        src: "/gallery/brown-truck/exterior.jpg",
+        alt: "Exterior after full detail",
+        isAfter: true,
+      },
+      {
+        src: "/gallery/brown-truck/exterior-front.jpg",
+        alt: "Front quarter panel after detail",
+        isAfter: true,
+      },
+      {
+        src: "/gallery/brown-truck/driver-side.jpg",
+        alt: "Driver-side exterior after detail",
+        isAfter: true,
+      },
+      {
+        src: "/gallery/brown-truck/back-seat.jpg",
+        alt: "Rear interior after extraction and conditioning",
+        isAfter: true,
+      },
+      {
+        src: "/gallery/brown-truck/truck-bed.jpg",
+        alt: "Truck bed cleaned and dressed",
+        isAfter: true,
+      },
+      {
+        src: "/gallery/brown-truck/floor.jpg",
+        alt: "Interior floor after deep extraction",
+        isAfter: true,
+      },
+    ],
+  },
+];
 
 export type BeforeAfterPair = {
-  before: GalleryImage;
-  after: GalleryImage;
   label: string;
+  before: { src: string; alt: string };
+  after: { src: string; alt: string };
 };
 
-// TODO: swap in real before/after pair once shot. The current pair uses two
-// angles of the same finished truck so the slider renders without 404s.
-export const beforeAfter: BeforeAfterPair = {
+export const beforeAfterPair: BeforeAfterPair = {
   label: "Recent detail · client pickup",
   before: {
-    src: "/brownTruckDriverside.jpg",
-    alt: "Driver-side exterior after detail",
+    src: "/gallery/brown-truck/driver-side.jpg",
+    alt: "Driver-side before detail",
   },
   after: {
-    src: "/BrownTruckExteriorFront.jpg",
+    src: "/gallery/brown-truck/exterior-front.jpg",
     alt: "Front exterior after detail",
   },
 };
 
-export const galleryGrid: GalleryImage[] = [
-  { src: "/brownTruckExterior.jpg", alt: "Exterior after detail" },
-  { src: "/brownTruckBackSeat.jpg", alt: "Back seat interior after detail" },
-  { src: "/brownTruckBed.jpg", alt: "Truck bed cleaned and dressed" },
-  { src: "/brownTruckFloor.jpg", alt: "Interior floor after extraction" },
-  { src: "/BrownTruckExteriorFront.jpg", alt: "Front quarter exterior" },
-  { src: "/brownTruckDriverside.jpg", alt: "Driver-side exterior" },
-];
+export const galleryGrid = vehicles.flatMap((v) => v.images);
