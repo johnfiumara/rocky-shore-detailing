@@ -8,17 +8,17 @@ export const processSteps: ProcessStep[] = [
   {
     number: "01",
     title: "Arrive at your driveway",
-    body: "Mobile setup — water, power, and product all come with the truck. No drop-off, no shop visit.",
+    body: "arrive with tools, I trust my equiment, please allow access to water(weather through faucet or outside spicket if available)",
   },
   {
     number: "02",
     title: "Inspect & document",
-    body: "Walk-around with photos and paint readings so we're aligned on goals before a single mitt touches metal.",
+    body: "Walk-around with photos so we're aligned on goals before a single mitt touches metal.",
   },
   {
     number: "03",
     title: "Wash & decontaminate",
-    body: "Foam pre-wash, two-bucket hand wash, iron-x, clay if needed. Bonded contaminants gone before polishing starts.",
+    body: " execute the the agreed apon package",
   },
   {
     number: "04",

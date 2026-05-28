@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(set -e)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git rm *)",
+      "Bash(npx tsc *)",
+      "Bash(git *)",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__new_page",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__resize_page",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__take_screenshot",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__list_console_messages",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__list_network_requests",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__evaluate_script",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__navigate_page",
+      "Skill(superpowers:brainstorming)",
+      "Bash(bash *)",
+      "Skill(superpowers:writing-plans)",
+      "Bash(node --check .claude/hooks/lint-edited.mjs)",
+      "Bash(node --check .claude/hooks/block-env-edits.mjs)",
+      "Bash(node -e \"JSON.parse\\(require\\('fs'\\).readFileSync\\('.claude/settings.json','utf8'\\)\\); console.log\\('settings.json: valid JSON'\\)\")",
+      "Bash(node .claude/hooks/lint-edited.mjs)",
+      "Bash(echo \"lint-edited skip-non-ts exit: $?\")",
+      "Bash(echo \"lint-edited real-file exit: $?\")",
+      "Bash(node .claude/hooks/block-env-edits.mjs)",
+      "Bash(echo \"block-env normal-file exit: $?\")",
+      "Bash(echo \"block-env .env-file exit: $?\")"
+    ]
+  }
+}

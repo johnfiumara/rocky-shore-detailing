@@ -29,7 +29,7 @@ export default function BookingSection() {
     resolver: zodResolver(bookingSchema),
     mode: "onTouched",
     defaultValues: {
-      service: "full-detail",
+      service: "full-package",
       year: undefined,
       make: "",
       model: "",

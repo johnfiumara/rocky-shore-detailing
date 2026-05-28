@@ -34,11 +34,12 @@ export default function BookingStepVehicle() {
                 />
                 <div className="flex items-baseline justify-between gap-4">
                   <span className="font-display text-xl text-bone">{s.title}</span>
-                  <span className="font-mono-accent text-[10px] tracking-[0.2em] uppercase text-bronze">
-                    {s.eyebrow.split("·")[0].trim()}
-                  </span>
+                  {s.priceFrom && (
+                    <span className="font-mono-accent text-[10px] tracking-[0.2em] uppercase text-bronze">
+                      From ${s.priceFrom[0]}
+                    </span>
+                  )}
                 </div>
-                <p className="mt-2 text-sm text-bone-dim leading-relaxed">{s.tagline}</p>
               </label>
             );
           })}

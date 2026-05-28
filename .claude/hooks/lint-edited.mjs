@@ -26,10 +26,12 @@ if (!/\.(ts|tsx)$/i.test(file)) process.exit(0);
 if (file.includes("node_modules") || file.endsWith(".d.ts")) process.exit(0);
 if (!/[\\/]src[\\/]/.test(file)) process.exit(0);
 
+const useShell = process.platform === "win32";
+const fileArg = useShell ? `"${file}"` : file;
 const result = spawnSync(
   "npx",
-  ["--no-install", "eslint", "--max-warnings=0", file],
-  { encoding: "utf8", shell: process.platform === "win32" },
+  ["--no-install", "eslint", "--max-warnings=0", fileArg],
+  { encoding: "utf8", shell: useShell },
 );
 
 if (result.status === 0) process.exit(0);

@@ -1,11 +1,12 @@
 import { z } from "zod";
 
 export const SERVICE_SLUGS = [
-  "express-wash",
-  "full-detail",
-  "paint-correction",
-  "ceramic-coating",
+  "full-package",
+  "interior-exterior",
+  "interior-tires",
+  "exterior-tires",
   "interior-restoration",
+  "refresh",
 ] as const;
 
 export const TIME_WINDOWS = [

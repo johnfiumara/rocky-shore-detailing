@@ -24,11 +24,11 @@ export default function ServiceCard({ service }: { service: Service }) {
           background: "radial-gradient(60% 80% at 80% 0%, rgba(201,163,107,0.16), transparent 70%)",
         }}
       />
-      <p className="eyebrow relative">{service.eyebrow}</p>
+      
       <h3 className="font-display text-3xl md:text-4xl mt-3 text-bone relative">{service.title}</h3>
-      <p className="mt-4 text-bone-dim leading-relaxed relative">{service.tagline}</p>
+      <p className="mt-4 text-bone-dim leading-relaxed relative">{service.package}</p>
       <ul className="mt-6 space-y-2 text-sm text-bone-dim relative">
-        {service.inclusions.map((inc) => (
+        {service.size.map((inc) => (
           <li key={inc} className="flex items-start gap-3">
             <span className="mt-2 size-1 rounded-full bg-bronze shrink-0" />
             <span>{inc}</span>
@@ -37,7 +37,7 @@ export default function ServiceCard({ service }: { service: Service }) {
       </ul>
       <div className="mt-8 pt-6 border-t border-line flex items-center justify-between relative">
         <span className="font-mono-accent text-[11px] tracking-[0.2em] uppercase text-bronze">
-          {service.priceFrom ? `From ${service.priceFrom}` : "Request a quote"}
+          {service.priceFrom ? `From $${service.priceFrom[0]}` : "Request a quote"}
         </span>
         <ArrowUpRight size={18} className="text-bronze group-hover:rotate-12 transition-transform" />
       </div>

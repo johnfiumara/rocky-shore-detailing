@@ -3,19 +3,16 @@ import {
   type BookingInput,
   TIME_WINDOW_LABELS,
 } from "@/lib/booking-schema";
+import { services } from "@/data/services";
 
 type SendInput = {
   data: BookingInput;
   files: File[];
 };
 
-const SERVICE_LABELS: Record<BookingInput["service"], string> = {
-  "express-wash": "Express Wash",
-  "full-detail": "Full Detail",
-  "paint-correction": "Paint Correction",
-  "ceramic-coating": "Ceramic Coating",
-  "interior-restoration": "Interior Restoration",
-};
+const SERVICE_LABELS = Object.fromEntries(
+  services.map((s) => [s.slug, s.title]),
+) as Record<BookingInput["service"], string>;
 
 function escapeHtml(s: string): string {
   return s

@@ -1,76 +1,52 @@
 export type Service = {
   slug: string;
-  eyebrow: string;
+  package: string;
   title: string;
-  tagline: string;
-  inclusions: string[];
-  priceFrom?: string;
+  size: string[];
+  priceFrom?: number[];
 };
 
 export const services: Service[] = [
   {
-    slug: "express-wash",
-    eyebrow: "01 · Maintenance",
-    title: "Express Wash",
-    tagline: "A quick, careful reset between full details — never a drive-through.",
-    inclusions: [
-      "Two-bucket hand wash",
-      "Wheel & tire cleaning",
-      "Spray sealant top-up",
-      "Glass cleaned inside & out",
-      "Door jambs wiped",
-    ],
+    slug: "full-package",
+    title: "Interior, Exterior, Tires, & Trunk",
+    size: ["S", "M", "L"],
+    package: "Full",
+    priceFrom: [200, 235, 270],
   },
   {
-    slug: "full-detail",
-    eyebrow: "02 · Signature",
-    title: "Full Detail",
-    tagline: "The complete reset — outside and in.",
-    inclusions: [
-      "Full decontamination wash",
-      "Iron remover + clay treatment",
-      "Single-stage polish",
-      "Interior deep clean & vacuum",
-      "Leather conditioned, plastics dressed",
-    ],
+    slug: "interior-exterior",
+    title: "Interior and Exterior",
+    size: ["S", "M", "L"],
+    package: "interniorPlus",
+    priceFrom: [150, 185, 220],
   },
   {
-    slug: "paint-correction",
-    eyebrow: "03 · Restoration",
-    title: "Paint Correction",
-    tagline: "Multi-stage compounding to remove swirl marks, light scratches, and oxidation.",
-    inclusions: [
-      "Paint depth measurement",
-      "Two- or three-stage cut & polish",
-      "Defect removal up to 80–95%",
-      "Finishing polish for clarity",
-      "Sealant or coating prep",
-    ],
+    slug: "interior-tires",
+    title: "Interior and Tires",
+    size: ["S", "M", "L"],
+    package: "IandT",
+    priceFrom: [145, 165, 185],
   },
   {
-    slug: "ceramic-coating",
-    eyebrow: "04 · Protection",
-    title: "Ceramic Coating",
-    tagline: "Long-term gloss and chemical resistance — measured in years, not weeks.",
-    inclusions: [
-      "Paint correction prep",
-      "Panel-wipe & IPA prep",
-      "Professional-grade ceramic application",
-      "12-hour cure window",
-      "Aftercare kit & instructions",
-    ],
+    slug: "exterior-tires",
+    title: "Exterior and Tires",
+    size: ["S", "M", "L"],
+    package: "EandT",
+    priceFrom: [100, 130, 130],
   },
   {
     slug: "interior-restoration",
-    eyebrow: "05 · Interior",
     title: "Interior Restoration",
-    tagline: "Pet hair, spills, scent, stains — handled.",
-    inclusions: [
-      "Full vacuum incl. seat rails",
-      "Hot-water extraction on fabrics",
-      "Leather clean + condition",
-      "Headliner & vents detailed",
-      "Odor neutralizer treatment",
-    ],
+    size: ["S", "M", "L"],
+    package: "I",
+    priceFrom: [110, 130, 150],
+  },
+  {
+    slug: "refresh",
+    title: "Refresh",
+    size: ["S", "M", "L"],
+    package: "refresh",
+    priceFrom: [65, 85, 105],
   },
 ];

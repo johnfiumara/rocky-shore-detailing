@@ -7,9 +7,9 @@ export type Testimonial = {
 export const testimonials: Testimonial[] = [
   {
     quote:
-      "Aiden brought my eight-year-old daily back to dealer-floor condition. Showed up early, worked late, left no streaks.",
-    name: "Marcus L.",
-    context: "Portland · 2018 Audi A4",
+      "I can’t possibly recommend Aiden enough.  He detailed my truck this afternoon, and did such an amazing, thorough job - inside and out.  Aiden is a super nice guy, and did such a great job - seriously, if you need your vehicle detailed, I can’t imagine anyone better.  Great communication before, friendly during.  10 out of 10.",
+    name: "Andrew C",
+    context: "Gorham · 2026",
   },
   {
     quote:
