@@ -6,7 +6,7 @@ export type FaqItem = {
 export const faq: FaqItem[] = [
   {
     q: "Where do you travel?",
-    a: "Yarmouth to Freeport Maine",
+    a: "Yarmouth to Freeport, Maine.",
   },
   {
     q: "What happens if it rains?",
@@ -14,13 +14,14 @@ export const faq: FaqItem[] = [
   },
   {
     q: "How long does a typical detail take?",
-    a: "Express Wash is about an hour. A Full Detail runs 4–6 hours depending on condition. "},
-  {
-    q: "How do I pay?",
-    a: "check, Venmo, or cash. Payment is collected on completion after you've walked around the vehicle.",
+    a: "Express Wash is about an hour. A Full Detail runs 4–6 hours depending on condition.",
   },
   {
-    q: "Bundles and more",
-    a:"see listed prices"
-  }
+    q: "How do I pay?",
+    a: "Check, Venmo, or cash. Payment is collected on completion after you've walked around the vehicle.",
+  },
+  {
+    q: "Bundles and more?",
+    a: "See listed prices.",
+  },
 ];

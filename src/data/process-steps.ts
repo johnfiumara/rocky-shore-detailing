@@ -8,7 +8,7 @@ export const processSteps: ProcessStep[] = [
   {
     number: "01",
     title: "Arrive at your driveway",
-    body: "arrive with tools, I trust my equiment, please allow access to water(weather through faucet or outside spicket if available)",
+    body: "I show up with my own tools and supplies. All I ask is access to water — an outdoor spigot or interior faucet works.",
   },
   {
     number: "02",
@@ -18,7 +18,7 @@ export const processSteps: ProcessStep[] = [
   {
     number: "03",
     title: "Wash & decontaminate",
-    body: " execute the the agreed apon package",
+    body: "Execute the agreed-upon package — wash, decontamination, and any add-ons you booked.",
   },
   {
     number: "04",

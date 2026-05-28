@@ -34,11 +34,9 @@ export default function BookingStepVehicle() {
                 />
                 <div className="flex items-baseline justify-between gap-4">
                   <span className="font-display text-xl text-bone">{s.title}</span>
-                  {s.priceFrom && (
-                    <span className="font-mono-accent text-[10px] tracking-[0.2em] uppercase text-bronze">
-                      From ${s.priceFrom[0]}
-                    </span>
-                  )}
+                  <span className="font-mono-accent text-[10px] tracking-[0.2em] uppercase text-bronze">
+                    From ${s.tiers[0].price}
+                  </span>
                 </div>
               </label>
             );

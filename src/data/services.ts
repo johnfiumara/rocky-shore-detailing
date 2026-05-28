@@ -1,52 +1,67 @@
+export type ServiceTier = {
+  size: "S" | "M" | "L";
+  price: number;
+};
+
 export type Service = {
   slug: string;
-  package: string;
   title: string;
-  size: string[];
-  priceFrom?: number[];
+  tiers: ServiceTier[];
 };
 
 export const services: Service[] = [
   {
     slug: "full-package",
-    title: "Interior, Exterior, Tires, & Trunk",
-    size: ["S", "M", "L"],
-    package: "Full",
-    priceFrom: [200, 235, 270],
+    title: "Interior, Exterior, Tires & Trunk",
+    tiers: [
+      { size: "S", price: 200 },
+      { size: "M", price: 235 },
+      { size: "L", price: 270 },
+    ],
   },
   {
     slug: "interior-exterior",
-    title: "Interior and Exterior",
-    size: ["S", "M", "L"],
-    package: "interniorPlus",
-    priceFrom: [150, 185, 220],
+    title: "Interior & Exterior",
+    tiers: [
+      { size: "S", price: 150 },
+      { size: "M", price: 185 },
+      { size: "L", price: 220 },
+    ],
   },
   {
     slug: "interior-tires",
-    title: "Interior and Tires",
-    size: ["S", "M", "L"],
-    package: "IandT",
-    priceFrom: [145, 165, 185],
+    title: "Interior & Tires",
+    tiers: [
+      { size: "S", price: 145 },
+      { size: "M", price: 165 },
+      { size: "L", price: 185 },
+    ],
   },
   {
     slug: "exterior-tires",
-    title: "Exterior and Tires",
-    size: ["S", "M", "L"],
-    package: "EandT",
-    priceFrom: [100, 130, 130],
+    title: "Exterior & Tires",
+    tiers: [
+      { size: "S", price: 100 },
+      { size: "M", price: 130 },
+      { size: "L", price: 130 },
+    ],
   },
   {
     slug: "interior-restoration",
     title: "Interior Restoration",
-    size: ["S", "M", "L"],
-    package: "I",
-    priceFrom: [110, 130, 150],
+    tiers: [
+      { size: "S", price: 110 },
+      { size: "M", price: 130 },
+      { size: "L", price: 150 },
+    ],
   },
   {
     slug: "refresh",
     title: "Refresh",
-    size: ["S", "M", "L"],
-    package: "refresh",
-    priceFrom: [65, 85, 105],
+    tiers: [
+      { size: "S", price: 65 },
+      { size: "M", price: 85 },
+      { size: "L", price: 105 },
+    ],
   },
 ];

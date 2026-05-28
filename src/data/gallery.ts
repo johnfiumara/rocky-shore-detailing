@@ -9,24 +9,25 @@ export type BeforeAfterPair = {
   label: string;
 };
 
-// Placeholder Unsplash images — replace with real before/after shots in /public/gallery/
+// TODO: swap in real before/after pair once shot. The current pair uses two
+// angles of the same finished truck so the slider renders without 404s.
 export const beforeAfter: BeforeAfterPair = {
-  label: "Single-stage paint correction · 2017 BMW M2",
+  label: "Recent detail · client pickup",
   before: {
-    src: "0",
-    alt: "Car with swirl marks and oxidation before correction",
+    src: "/brownTruckDriverside.jpg",
+    alt: "Driver-side exterior after detail",
   },
   after: {
-    src: "0",
-    alt: "Same car after paint correction, deep gloss restored",
+    src: "/BrownTruckExteriorFront.jpg",
+    alt: "Front exterior after detail",
   },
 };
 
 export const galleryGrid: GalleryImage[] = [
-  { src: "public/brownTruckFloor.jpg", alt: "Detailed black sports car at sunset" },
-  { src: "public/brownTruckBed.jpg", alt: "Microfiber close-up on hood reflection" },
-  { src: "public/brownTruckDriverside.jpg", alt: "Wheel and brake caliper detail" },
-  { src: "public/brownTruckExterior.jpg", alt: "Side profile of polished sedan" },
-  { src: "public/brownTruckFloor.jpg", alt: "Foam-covered hood during wash" },
-  {src:"public/BrownTruckExteriorFront.jpg", alt: "truck"}
+  { src: "/brownTruckExterior.jpg", alt: "Exterior after detail" },
+  { src: "/brownTruckBackSeat.jpg", alt: "Back seat interior after detail" },
+  { src: "/brownTruckBed.jpg", alt: "Truck bed cleaned and dressed" },
+  { src: "/brownTruckFloor.jpg", alt: "Interior floor after extraction" },
+  { src: "/BrownTruckExteriorFront.jpg", alt: "Front quarter exterior" },
+  { src: "/brownTruckDriverside.jpg", alt: "Driver-side exterior" },
 ];

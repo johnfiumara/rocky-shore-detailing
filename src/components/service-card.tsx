@@ -24,20 +24,20 @@ export default function ServiceCard({ service }: { service: Service }) {
           background: "radial-gradient(60% 80% at 80% 0%, rgba(201,163,107,0.16), transparent 70%)",
         }}
       />
-      
-      <h3 className="font-display text-3xl md:text-4xl mt-3 text-bone relative">{service.title}</h3>
-      <p className="mt-4 text-bone-dim leading-relaxed relative">{service.package}</p>
+      <h3 className="font-display text-3xl md:text-4xl text-bone relative">{service.title}</h3>
       <ul className="mt-6 space-y-2 text-sm text-bone-dim relative">
-        {service.size.map((inc) => (
-          <li key={inc} className="flex items-start gap-3">
-            <span className="mt-2 size-1 rounded-full bg-bronze shrink-0" />
-            <span>{inc}</span>
+        {service.tiers.map((t) => (
+          <li key={t.size} className="flex items-center justify-between gap-3 border-b border-line/60 pb-2 last:border-b-0">
+            <span className="font-mono-accent text-[11px] tracking-[0.2em] uppercase text-mist">
+              {t.size}
+            </span>
+            <span className="text-bone">${t.price}</span>
           </li>
         ))}
       </ul>
       <div className="mt-8 pt-6 border-t border-line flex items-center justify-between relative">
         <span className="font-mono-accent text-[11px] tracking-[0.2em] uppercase text-bronze">
-          {service.priceFrom ? `From $${service.priceFrom[0]}` : "Request a quote"}
+          From ${service.tiers[0].price}
         </span>
         <ArrowUpRight size={18} className="text-bronze group-hover:rotate-12 transition-transform" />
       </div>
