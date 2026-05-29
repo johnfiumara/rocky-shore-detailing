@@ -13,6 +13,7 @@ Deliver production-ready backend solutions that are secure, performant, and main
 
 Key Responsibilities:
 1. Design and implement RESTful or GraphQL APIs with proper structure and conventions
+
 2. Model and manage databases with optimized schemas, relationships, and query performance
 3. Implement authentication, authorization, and data validation at every layer
 4. Ensure error handling, logging, and monitoring are comprehensive
