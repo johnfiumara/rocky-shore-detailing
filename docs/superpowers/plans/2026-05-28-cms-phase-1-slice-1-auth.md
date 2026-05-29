@@ -14,27 +14,24 @@
 
 ## Status as of 2026-05-29
 
-Half-shipped. The Supabase scaffolding landed but no consumer code was migrated, so the site still runs on `bcrypt` + JWT cookies in production.
+**Code-complete.** Tasks 1-13 are shipped. Task 14 is the only remaining item — a manual browser smoke test that can't be automated.
 
-**Done (verified via commits matching the plan's exact commit messages):**
+**Done:**
 - Task 1 — Supabase + vitest deps installed (`734b1ed`)
 - Task 2 — vitest configured, sanity test passes (`d6c4d39`)
-- Task 3 — `user_role` migration applied; idempotent fix landed too (`8ff2315`, `5967181`)
+- Task 3 — `user_role` migration applied (`8ff2315`, `5967181`)
 - Task 4 — `src/lib/supabase/{server,client}.ts` helpers (`b4afd92`)
 - Task 5 — `src/lib/auth.ts` + `requireRole` tests (`a7508f8`)
+- Task 6 — `src/proxy.ts` reads Supabase session, no more `jose`; 4 new test cases (`5f96140`)
+- Tasks 7-10 — login form, login action, login page bounce, 8 admin page guards, and every server action migrated to `requireRole` (`93d33e3`)
+- Task 11 — `scripts/provision-admin.ts` + `npm run provision:admin` + `dotenv` dev dep (`91368ba`)
+- Task 12 — `.env.example` rewritten with Supabase trio; `README.md` env table + Deploying step 3.5 updated (`91368ba`)
+- Task 13 — `src/lib/session.ts` deleted; `bcryptjs`, `@types/bcryptjs`, `jose` dropped from deps (`91368ba`)
 
-**Not done (verified against current file state):**
-- Task 6 — `src/proxy.ts` still imports `jose.jwtVerify` and reads `ADMIN_JWT_SECRET`; no `src/__tests__/proxy.test.ts`
-- Task 7 — `actions.ts` still imports `bcrypt` + `requireSession` from `@/lib/session`; login form has no email field
-- Task 8 — `login/page.tsx` still uses `getSession` from `@/lib/session`, not `getCurrentUser`
-- Task 9 — all 8 admin pages still call `await requireSession()`
-- Task 10 — every action below the auth block still calls `requireSession()`
-- Task 11 — `scripts/provision-admin.ts` does not exist
-- Task 12 — `.env.example` was deleted (not modified); `README.md` still documents `ADMIN_JWT_SECRET` and `ADMIN_PASSWORD_HASH`
-- Task 13 — `src/lib/session.ts` still exists; `bcryptjs`, `@types/bcryptjs`, and `jose` are still in `package.json` deps
-- Task 14 — manual smoke test cannot pass while Tasks 6-13 are open
+**Open:**
+- Task 14 — manual smoke test. Run through it before marking the slice fully closed.
 
-Resume at Task 6.
+After Task 14: 9 vitest tests cover the auth boundary, all `/admin/*` traffic runs through Supabase Auth + the `user_role` gate, and the legacy stack (`ADMIN_JWT_SECRET`, `ADMIN_PASSWORD_HASH`, `bcryptjs`, `jose`, `src/lib/session.ts`) is gone.
 
 ---
 
