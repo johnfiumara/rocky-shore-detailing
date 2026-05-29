@@ -18,8 +18,9 @@ Site runs at `http://localhost:3000`.
 | Var | Required? | Default | Notes |
 |---|---|---|---|
 | `DATABASE_URL` | yes | — | Postgres connection string. Use a *pooled* URL in production (Neon `-pooler`, Supabase port 6543). |
-| `ADMIN_JWT_SECRET` | yes | — | Signs the admin session cookie. Generate: `openssl rand -base64 48`. App refuses to boot the admin area without it. |
-| `ADMIN_PASSWORD_HASH` | yes | — | bcrypt hash of the admin login password. Generate: `node -e "console.log(require('bcryptjs').hashSync('your-password',12))"`. |
+| `NEXT_PUBLIC_SUPABASE_URL` | yes | — | Supabase project URL. From **Project Settings → API**. |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | yes | — | Supabase anon key. Public by design (RLS gates access). |
+| `SUPABASE_SERVICE_ROLE_KEY` | yes | — | Server-only. Used by `scripts/provision-admin.ts` and future admin-side scripts. **Never commit, never expose.** |
 | `RESEND_API_KEY` | yes | — | Get one free at https://resend.com (3,000 emails/mo). Without this, booking submissions return 502. |
 | `BOOKING_TO_EMAIL` | no | `fumarajohn8@gmail.com` | Where bookings land. |
 | `BOOKING_FROM_EMAIL` | no | `Rocky Shore Bookings <onboarding@resend.dev>` | Resend's testing sender until you verify a custom domain at https://resend.com/domains. |
@@ -45,8 +46,9 @@ The site is host-neutral — it ships with a `netlify.toml` and works the same o
 **2. Set the required env vars** in your host's dashboard:
 
 - `DATABASE_URL`
-- `ADMIN_JWT_SECRET` — generate with `openssl rand -base64 48`
-- `ADMIN_PASSWORD_HASH` — generate with `node -e "console.log(require('bcryptjs').hashSync('your-password',12))"`
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
 - `RESEND_API_KEY`
 
 See the table above for optional vars.
@@ -59,6 +61,14 @@ DATABASE_URL=postgresql://... npm run db:seed   # optional: seeds services, FAQ,
 ```
 
 Re-run `db:deploy` whenever `prisma/schema.prisma` changes.
+
+**3.5. Provision the first admin user:**
+
+```bash
+npm run provision:admin -- you@example.com 'a-strong-password'
+```
+
+Subsequent editors are invited from `/admin/users` (Phase 1 Slice 5, once shipped).
 
 **4. Deploy** via your host's normal flow (`vercel`, `netlify deploy`, git push, etc.). The build command is `npm run build`, which runs `prisma generate` and `next build`.
 
