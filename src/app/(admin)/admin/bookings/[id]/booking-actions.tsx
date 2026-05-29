@@ -33,23 +33,61 @@ export default function BookingActions({ booking }: { booking: Booking }) {
   const [notes, setNotes] = useState(booking.adminNotes ?? "");
   const [price, setPrice] = useState(booking.price?.toString() ?? "");
   const [saving, setSaving] = useState(false);
+  const [savingPrice, setSavingPrice] = useState(false);
+  const [priceError, setPriceError] = useState<string | null>(null);
+  const [statusError, setStatusError] = useState<string | null>(null);
 
   const changeStatus = (status: BookingStatus) => {
     startTransition(async () => {
       setOptimisticStatus(status);
-      await updateBookingStatus(booking.id, status);
+      try {
+        await updateBookingStatus(booking.id, status);
+        setStatusError(null);
+      } catch (error) {
+        // Revert optimistic update on error
+        setOptimisticStatus(booking.status);
+        setStatusError(error instanceof Error ? error.message : "Failed to update status");
+      }
     });
   };
 
   const saveNotes = async () => {
     setSaving(true);
-    await updateBookingAdminNotes(booking.id, notes);
-    setSaving(false);
+    try {
+      await updateBookingAdminNotes(booking.id, notes);
+    } catch (error) {
+      // Error is caught but doesn't prevent finally from executing
+      console.error("Failed to save notes:", error);
+    } finally {
+      // Guaranteed to execute even if error occurs
+      setSaving(false);
+    }
   };
 
   const savePrice = async () => {
     const parsed = parseFloat(price);
-    if (!isNaN(parsed)) await updateBookingPrice(booking.id, parsed);
+    
+    // Validation: check if price is valid
+    if (isNaN(parsed)) {
+      setPriceError("Please enter a valid price");
+      return;
+    }
+    
+    if (parsed < 0) {
+      setPriceError("Price cannot be negative");
+      return;
+    }
+    
+    setSavingPrice(true);
+    try {
+      await updateBookingPrice(booking.id, parsed);
+      setPriceError(null);
+    } catch (error) {
+      setPriceError(error instanceof Error ? error.message : "Failed to save price");
+      console.error("Failed to save price:", error);
+    } finally {
+      setSavingPrice(false);
+    }
   };
 
   return (
@@ -72,6 +110,9 @@ export default function BookingActions({ booking }: { booking: Booking }) {
             </button>
           ))}
         </div>
+        {statusError && (
+          <p className="text-red-500 text-xs mt-2">{statusError}</p>
+        )}
       </div>
 
       {/* Price */}
@@ -85,8 +126,17 @@ export default function BookingActions({ booking }: { booking: Booking }) {
             placeholder="e.g. 200"
             className="bg-surface border border-line rounded-lg px-3 py-2 text-bone text-sm focus:outline-none focus:border-bronze w-32"
           />
-          <button onClick={savePrice} className="btn-primary text-xs px-4">Save</button>
+          <button 
+            onClick={savePrice} 
+            disabled={savingPrice}
+            className="btn-primary text-xs px-4 disabled:opacity-50"
+          >
+            {savingPrice ? "Saving…" : "Save"}
+          </button>
         </div>
+        {priceError && (
+          <p className="text-red-500 text-xs mt-1">{priceError}</p>
+        )}
       </div>
 
       {/* Admin notes */}
