@@ -24,6 +24,8 @@ if (!file) process.exit(0);
 
 const base = path.basename(file);
 if (!/^\.env(\.|$)/.test(base)) process.exit(0);
+// .env.example is a committed template with no secrets — agents may edit it.
+if (base === ".env.example") process.exit(0);
 
 process.stderr.write(
   `Blocked: refusing to edit "${file}". This repo's .env* files hold ` +

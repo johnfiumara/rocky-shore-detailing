@@ -6,7 +6,8 @@ const COOKIE_NAME = "rsd_admin_session";
 const PUBLIC_ADMIN_PATHS = ["/admin/login"];
 
 function getSecret() {
-  const secret = process.env.ADMIN_JWT_SECRET ?? "";
+  const secret = process.env.ADMIN_JWT_SECRET;
+  if (!secret) throw new Error("ADMIN_JWT_SECRET is not set");
   return new TextEncoder().encode(secret);
 }
 
