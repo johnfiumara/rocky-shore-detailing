@@ -93,6 +93,7 @@ export default function BookingActions({ booking }: { booking: Booking }) {
       <div>
         <p className="text-bone-dim text-xs uppercase tracking-wider mb-2">Admin Notes</p>
         <textarea
+        placeholder="Internal notes about this booking"
           rows={4}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
