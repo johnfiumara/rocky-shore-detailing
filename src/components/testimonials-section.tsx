@@ -1,22 +1,8 @@
 import Marquee from "@/components/marquee";
 import Reveal from "@/components/reveal";
-import { prisma } from "@/lib/prisma";
-import { testimonials as staticTestimonials } from "@/data/testimonials";
+import { getTestimonials } from "@/lib/cms/testimonials";
 
 type QuoteData = { quote: string; name: string; context: string };
-
-async function getTestimonials(): Promise<QuoteData[]> {
-  try {
-    const rows = await prisma.testimonial.findMany({
-      where: { published: true },
-      orderBy: { sortOrder: "asc" },
-    });
-    if (rows.length > 0) return rows;
-  } catch {
-    // DB not available — fall through to static data
-  }
-  return staticTestimonials;
-}
 
 function Quote({ quote, name, context }: QuoteData) {
   return (
@@ -62,3 +48,4 @@ export default async function TestimonialsSection() {
     </section>
   );
 }
+

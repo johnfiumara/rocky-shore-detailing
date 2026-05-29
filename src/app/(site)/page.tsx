@@ -1,11 +1,45 @@
+import dynamic from "next/dynamic";
 import Hero from "@/components/hero/hero";
 import StorySection from "@/components/story-section";
 import ServicesSection from "@/components/services-section";
-import ProcessSection from "@/components/process-section";
-import GallerySection from "@/components/gallery-section";
-import TestimonialsSection from "@/components/testimonials-section";
-import BookingSection from "@/components/booking-section";
-import FaqSection from "@/components/faq-section";
+import {
+  BookingSkeleton,
+  ProcessSkeleton,
+  GallerySkeleton,
+  FaqSkeleton,
+  TestimonialsSkeleton,
+} from "@/components/skeletons";
+
+// Static imports (kept as-is)
+// const Hero = ...
+// const StorySection = ...
+// const ServicesSection = ...
+
+// Dynamic imports with skeleton loading states
+const ProcessSection = dynamic(
+  () => import("@/components/process-section"),
+  { loading: () => <ProcessSkeleton />, ssr: true }
+);
+
+const GallerySection = dynamic(
+  () => import("@/components/gallery-section"),
+  { loading: () => <GallerySkeleton />, ssr: true }
+);
+
+const TestimonialsSection = dynamic(
+  () => import("@/components/testimonials-section"),
+  { loading: () => <TestimonialsSkeleton />, ssr: true }
+);
+
+const BookingSection = dynamic(
+  () => import("@/components/booking-section"),
+  { loading: () => <BookingSkeleton />, ssr: true }
+);
+
+const FaqSection = dynamic(
+  () => import("@/components/faq-section"),
+  { loading: () => <FaqSkeleton />, ssr: true }
+);
 
 export default function Page() {
   return (

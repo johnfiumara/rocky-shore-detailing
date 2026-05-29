@@ -1,21 +1,6 @@
 import Reveal from "@/components/reveal";
 import ServiceCard from "@/components/service-card";
-import { prisma } from "@/lib/prisma";
-import { services as staticServices } from "@/data/services";
-
-async function getServices() {
-  try {
-    const rows = await prisma.service.findMany({
-      where: { active: true },
-      orderBy: { sortOrder: "asc" },
-      include: { tiers: { orderBy: { size: "asc" } } },
-    });
-    if (rows.length > 0) return rows;
-  } catch {
-    // DB not available — fall through to static data
-  }
-  return staticServices;
-}
+import { getServices } from "@/lib/cms/services";
 
 export default async function ServicesSection() {
   const services = await getServices();
@@ -54,3 +39,4 @@ export default async function ServicesSection() {
     </section>
   );
 }
+

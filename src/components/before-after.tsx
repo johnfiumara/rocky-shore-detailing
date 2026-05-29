@@ -34,7 +34,7 @@ export default function BeforeAfter({ pair }: { pair: BeforeAfterPair }) {
         (e.target as HTMLElement).releasePointerCapture(e.pointerId);
       }}
       role="slider"
-      aria-label={`Before and after: ${pair.label}`}
+      aria-label={`Before and after slider: ${pair.label}. Use arrow keys or drag to compare.`}
       aria-valuenow={Math.round(pos)}
       aria-valuemin={0}
       aria-valuemax={100}

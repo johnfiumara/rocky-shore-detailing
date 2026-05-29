@@ -108,3 +108,5 @@ function StatusBadge({ status }: { status: BookingStatus }) {
   const { label, className } = map[status];
   return <span className={`inline-block px-2 py-0.5 rounded-full text-xs ${className}`}>{label}</span>;
 }
+
+

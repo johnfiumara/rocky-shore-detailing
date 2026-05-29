@@ -44,6 +44,11 @@ export default function BookingStepPhotos({
     onFilesChange(next);
   };
 
+  const getFilePreviewAlt = (fileName: string, index: number) => {
+    const ext = fileName.split('.').pop() || 'image';
+    return `Uploaded photo ${index + 1} (${ext})`;
+  };
+
   return (
     <div className="space-y-10">
       <div>
@@ -98,10 +103,14 @@ export default function BookingStepPhotos({
                   className="relative aspect-square rounded-lg overflow-hidden border border-line group"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={url} alt={f.name} className="w-full h-full object-cover" />
+                  <img 
+                    src={url} 
+                    alt={getFilePreviewAlt(f.name, i)} 
+                    className="w-full h-full object-cover" 
+                  />
                   <button
                     type="button"
-                    aria-label={`Remove ${f.name}`}
+                    aria-label={`Remove photo ${i + 1}`}
                     onClick={() => removeAt(i)}
                     className="absolute top-2 right-2 size-7 rounded-full bg-ink/80 text-bone flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                   >

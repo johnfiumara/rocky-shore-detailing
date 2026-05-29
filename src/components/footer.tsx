@@ -1,56 +1,81 @@
-import { Mail, Phone, AtSign } from "lucide-react";
+import { getSettings } from "@/lib/cms/settings";
+import { Mail, Phone } from "lucide-react";
 
-export default function Footer() {
+export default async function Footer() {
   const year = new Date().getFullYear();
+  const settings = await getSettings();
+
+  const phone = (settings["contact.phone"] as string) ?? "(207) 555-0100";
+  const email = (settings["contact.email"] as string) ?? "hello@rockyshoredetailing.com";
+  const instagram = (settings["contact.instagram"] as string) ?? "@rockyshore";
+  const hours = (settings["contact.hours"] as Record<string, string>) ?? {
+    weekday: "Mon – Fri · 8a – 6p",
+    saturday: "Saturday · 9a – 4p",
+    sunday: "Sunday · by appointment",
+  };
+  const tagline = (settings["site.tagline"] as string) ??
+    "Mobile auto detailing by Aiden Quinn. From Kittery to Madawaska — we bring the studio to your driveway.";
+
   return (
-    <footer className="relative border-t border-line bg-ink">
-      <div className="mx-auto max-w-7xl px-6 py-20">
+    <footer id="contact" className="relative border-t border-line">
+      <div className="mx-auto max-w-7xl px-6 py-24 md:py-32">
         <div className="grid gap-16 md:grid-cols-12">
-          <div className="md:col-span-7">
-            <p className="eyebrow">Rocky Shore Detailing</p>
-            <h2 className="headline mt-4 text-5xl md:text-7xl">
-              Hand-detailed,<br />
-              <em>statewide.</em>
-            </h2>
-            <p className="mt-6 max-w-md text-bone-dim leading-relaxed">
-              Mobile auto detailing by Aiden Quinn. From Kittery to Madawaska — we bring the studio to your driveway.
+          <div className="md:col-span-6">
+            <p className="font-display text-bone text-3xl md:text-4xl max-w-md leading-tight">
+              {tagline}
             </p>
+            <div className="mt-10 flex flex-wrap gap-4">
+              <a href={`tel:${phone.replace(/\D/g, "")}`} className="btn-ghost text-sm flex items-center gap-2">
+                <Phone size={14} />
+                {phone}
+              </a>
+              <a href={`mailto:${email}`} className="btn-ghost text-sm flex items-center gap-2">
+                <Mail size={14} />
+                {email}
+              </a>
+            </div>
           </div>
 
-          <div className="md:col-span-5 grid grid-cols-2 gap-10">
+          <div className="md:col-span-4 md:col-start-9 space-y-8">
             <div>
-              <p className="font-mono-accent text-[11px] tracking-[0.2em] uppercase text-mist mb-4">Contact</p>
-              <ul className="space-y-3 text-bone">
-                <li className="flex items-center gap-3">
-                  <Phone size={14} className="text-bronze" />
-                  <a href="tel:+12075550100" className="hover:text-bronze-glow transition-colors">(207) 555-0100</a>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Mail size={14} className="text-bronze" />
-                  <a href="mailto:hello@rockyshoredetailing.com" className="hover:text-bronze-glow transition-colors">hello@rockyshoredetailing.com</a>
-                </li>
-                <li className="flex items-center gap-3">
-                  <AtSign size={14} className="text-bronze" />
-                  <a href="https://instagram.com" className="hover:text-bronze-glow transition-colors">@rockyshore</a>
-                </li>
+              <p className="font-mono-accent text-[11px] tracking-[0.2em] uppercase text-bone-dim mb-3">
+                Hours
+              </p>
+              <ul className="space-y-1 text-sm text-bone">
+                <li>{hours.weekday}</li>
+                <li>{hours.saturday}</li>
+                <li>{hours.sunday}</li>
               </ul>
             </div>
             <div>
-              <p className="font-mono-accent text-[11px] tracking-[0.2em] uppercase text-mist mb-4">Hours</p>
-              <ul className="space-y-2 text-bone-dim text-sm">
-                <li>Mon – Fri · 8a – 6p</li>
-                <li>Saturday · 9a – 4p</li>
-                <li>Sunday · by appointment</li>
-              </ul>
+              <p className="font-mono-accent text-[11px] tracking-[0.2em] uppercase text-bone-dim mb-3">
+                Social
+              </p>
+              <a
+                href={`https://instagram.com/${instagram.replace(/^@/, "")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-bone hover:text-bronze transition-colors flex items-center gap-2"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+                {instagram}
+              </a>
             </div>
           </div>
         </div>
 
-        <div className="mt-20 pt-8 border-t border-line flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-mist text-xs font-mono-accent tracking-wider uppercase">
-          <span>© {year} Rocky Shore Detailing · Statewide Maine</span>
-          <span>Built with care</span>
+        <div className="mt-24 pt-8 border-t border-line flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-bone-dim text-xs">
+            &copy; {year} Rocky Shore Detailing. All rights reserved.
+          </p>
+          <p className="text-bone-dim text-xs">
+            Maine · Mobile detailing statewide
+          </p>
         </div>
       </div>
     </footer>
   );
 }
+
+
+

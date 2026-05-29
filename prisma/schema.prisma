@@ -64,17 +64,18 @@ enum BookingStatus {
 }
 
 model GalleryImage {
-  id        String   @id @default(cuid())
-  vehicleId String?
-  vehicle   Vehicle? @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
-  src       String
-  alt       String
-  label     String?
-  isBefore  Boolean  @default(false)
-  isAfter   Boolean  @default(false)
-  sortOrder Int      @default(0)
-  published Boolean  @default(true)
-  createdAt DateTime @default(now())
+  id           String   @id @default(cuid())
+  vehicleId    String?
+  vehicle      Vehicle? @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+  mediaAssetId String?  @map("media_asset_id")
+  src          String
+  alt          String
+  label        String?
+  isBefore     Boolean  @default(false)
+  isAfter      Boolean  @default(false)
+  sortOrder    Int      @default(0)
+  published    Boolean  @default(true)
+  createdAt    DateTime @default(now())
 }
 
 model Service {
@@ -117,3 +118,15 @@ model FaqItem {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model ProcessStep {
+  id        String   @id @default(cuid())
+  title     String
+  body      String
+  published Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+

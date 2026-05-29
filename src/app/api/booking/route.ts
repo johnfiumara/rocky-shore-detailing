@@ -3,9 +3,6 @@ import { bookingSchema, validateFiles } from "@/lib/booking-schema";
 import { sendBookingEmail } from "@/lib/send-booking-email";
 import { prisma } from "@/lib/prisma";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
-
 export async function POST(request: Request) {
   let form: FormData;
   try {
@@ -102,3 +99,4 @@ export async function POST(request: Request) {
 
   return NextResponse.json({ ok: true });
 }
+

@@ -54,3 +54,5 @@ deno.lock
 # Prisma
 prisma/*.db
 prisma/*.db-journal
+
+.vercel

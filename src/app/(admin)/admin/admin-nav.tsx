@@ -12,6 +12,9 @@ import {
   LogOut,
   Menu,
   X,
+  Images,
+  Settings,
+  ShieldCheck,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -21,7 +24,10 @@ const NAV = [
   { href: "/admin/bookings", label: "Bookings", icon: FileText },
   { href: "/admin/customers", label: "Customers", icon: Users },
   { href: "/admin/gallery", label: "Gallery", icon: Image },
+  { href: "/admin/media", label: "Media", icon: Images },
   { href: "/admin/content", label: "Content", icon: FileText },
+  { href: "/admin/settings", label: "Settings", icon: Settings },
+  { href: "/admin/users", label: "Users", icon: ShieldCheck },
 ];
 
 export default function AdminNav() {
@@ -91,3 +97,5 @@ export default function AdminNav() {
     </>
   );
 }
+
+
