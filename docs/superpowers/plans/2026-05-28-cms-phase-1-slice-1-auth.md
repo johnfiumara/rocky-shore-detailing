@@ -12,6 +12,32 @@
 
 ---
 
+## Status as of 2026-05-29
+
+Half-shipped. The Supabase scaffolding landed but no consumer code was migrated, so the site still runs on `bcrypt` + JWT cookies in production.
+
+**Done (verified via commits matching the plan's exact commit messages):**
+- Task 1 — Supabase + vitest deps installed (`734b1ed`)
+- Task 2 — vitest configured, sanity test passes (`d6c4d39`)
+- Task 3 — `user_role` migration applied; idempotent fix landed too (`8ff2315`, `5967181`)
+- Task 4 — `src/lib/supabase/{server,client}.ts` helpers (`b4afd92`)
+- Task 5 — `src/lib/auth.ts` + `requireRole` tests (`a7508f8`)
+
+**Not done (verified against current file state):**
+- Task 6 — `src/proxy.ts` still imports `jose.jwtVerify` and reads `ADMIN_JWT_SECRET`; no `src/__tests__/proxy.test.ts`
+- Task 7 — `actions.ts` still imports `bcrypt` + `requireSession` from `@/lib/session`; login form has no email field
+- Task 8 — `login/page.tsx` still uses `getSession` from `@/lib/session`, not `getCurrentUser`
+- Task 9 — all 8 admin pages still call `await requireSession()`
+- Task 10 — every action below the auth block still calls `requireSession()`
+- Task 11 — `scripts/provision-admin.ts` does not exist
+- Task 12 — `.env.example` was deleted (not modified); `README.md` still documents `ADMIN_JWT_SECRET` and `ADMIN_PASSWORD_HASH`
+- Task 13 — `src/lib/session.ts` still exists; `bcryptjs`, `@types/bcryptjs`, and `jose` are still in `package.json` deps
+- Task 14 — manual smoke test cannot pass while Tasks 6-13 are open
+
+Resume at Task 6.
+
+---
+
 ## Prerequisites (user action, before Task 1 starts)
 
 The Supabase project itself has to exist before any code change is meaningful. The engineer running this plan does NOT do this — the project owner does, then hands over the resulting values.
@@ -40,7 +66,7 @@ Once the engineer has those four env values in `.env.local`, proceed to Task 1.
 - Modify: `package.json`
 - Modify: `package-lock.json` (auto)
 
-- [ ] **Step 1: Install runtime deps**
+- [x] **Step 1: Install runtime deps**
 
 Run:
 ```bash
@@ -49,7 +75,7 @@ npm install @supabase/supabase-js @supabase/ssr
 
 Expected: both packages installed, lockfile updated, no warnings about peer dep conflicts. Supabase packages support React 19 + Next 16.
 
-- [ ] **Step 2: Install dev deps (vitest + helpers)**
+- [x] **Step 2: Install dev deps (vitest + helpers)**
 
 Run:
 ```bash
@@ -58,7 +84,7 @@ npm install -D vitest @vitest/coverage-v8 @testing-library/react @testing-librar
 
 Expected: vitest 3.x, testing-library 16.x, jsdom 25.x installed.
 
-- [ ] **Step 3: Add test scripts**
+- [x] **Step 3: Add test scripts**
 
 Edit `package.json`. Replace:
 
@@ -76,7 +102,7 @@ with:
     "db:generate": "prisma generate",
 ```
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add package.json package-lock.json
@@ -92,7 +118,7 @@ git commit -m "chore(deps): add @supabase/{supabase-js,ssr} + vitest"
 - Create: `src/test/setup.ts`
 - Create: `src/lib/__tests__/sanity.test.ts`
 
-- [ ] **Step 1: Write vitest config**
+- [x] **Step 1: Write vitest config**
 
 Create `vitest.config.ts`:
 
@@ -115,7 +141,7 @@ export default defineConfig({
 });
 ```
 
-- [ ] **Step 2: Write setup file**
+- [x] **Step 2: Write setup file**
 
 Create `src/test/setup.ts`:
 
@@ -123,7 +149,7 @@ Create `src/test/setup.ts`:
 // Intentionally minimal. Per-test mocks live in the test file via vi.mock.
 ```
 
-- [ ] **Step 3: Write a sanity test**
+- [x] **Step 3: Write a sanity test**
 
 Create `src/lib/__tests__/sanity.test.ts`:
 
@@ -137,7 +163,7 @@ describe("vitest sanity", () => {
 });
 ```
 
-- [ ] **Step 4: Run the test**
+- [x] **Step 4: Run the test**
 
 Run:
 ```bash
@@ -146,7 +172,7 @@ npm run test:run
 
 Expected: 1 test passed, 0 failed.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add vitest.config.ts src/test/setup.ts src/lib/__tests__/sanity.test.ts package.json
@@ -162,7 +188,7 @@ git commit -m "chore(test): add vitest with a sanity test"
 
 Supabase SQL migrations live outside Prisma's domain because they touch `auth.users` (managed by Supabase) and use `auth.uid()`. Prisma keeps managing the app-domain tables.
 
-- [ ] **Step 1: Write the migration**
+- [x] **Step 1: Write the migration**
 
 Create `supabase/migrations/0001_user_role.sql`:
 
@@ -198,7 +224,7 @@ create policy user_role_admin_write on public.user_role
   );
 ```
 
-- [ ] **Step 2: Apply the migration to the Supabase project**
+- [x] **Step 2: Apply the migration to the Supabase project**
 
 Open the Supabase project's **SQL Editor**, paste the migration's contents, and run it.
 
@@ -206,11 +232,11 @@ Expected: query succeeds. `public.user_role` exists. RLS is enabled. Two policie
 
 Alternative (if the Supabase CLI is set up): `supabase db push` from the repo root.
 
-- [ ] **Step 3: Verify in the Supabase dashboard**
+- [x] **Step 3: Verify in the Supabase dashboard**
 
 Navigate to **Table Editor → public → user_role**. Confirm the table exists, has columns `user_id`, `role`, `created_at`, and `RLS Enabled` is on.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add supabase/migrations/0001_user_role.sql
@@ -225,7 +251,7 @@ git commit -m "feat(db): user_role table with self-read + admin-write RLS"
 - Create: `src/lib/supabase/server.ts`
 - Create: `src/lib/supabase/client.ts`
 
-- [ ] **Step 1: Write the server helper**
+- [x] **Step 1: Write the server helper**
 
 Create `src/lib/supabase/server.ts`:
 
@@ -282,7 +308,7 @@ export function supabaseAnon() {
 }
 ```
 
-- [ ] **Step 2: Write the browser client helper**
+- [x] **Step 2: Write the browser client helper**
 
 Create `src/lib/supabase/client.ts`:
 
@@ -309,7 +335,7 @@ export function supabaseBrowser() {
 }
 ```
 
-- [ ] **Step 3: Type-check**
+- [x] **Step 3: Type-check**
 
 Run:
 ```bash
@@ -318,7 +344,7 @@ npx tsc --noEmit
 
 Expected: no errors.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add src/lib/supabase/server.ts src/lib/supabase/client.ts
@@ -335,7 +361,7 @@ git commit -m "feat(supabase): server + browser client helpers via @supabase/ssr
 
 The contract: `requireRole(...roles)` reads the Supabase session via the server helper, looks up the user's row in `user_role`, and throws (or redirects) if the role isn't allowed. Pure utility code, but the redirect call must hit the right path, so we test the role-check logic with the redirect mocked.
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 Create `src/lib/__tests__/auth.test.ts`:
 
@@ -421,7 +447,7 @@ describe("requireRole", () => {
 });
 ```
 
-- [ ] **Step 2: Run tests, confirm failure**
+- [x] **Step 2: Run tests, confirm failure**
 
 Run:
 ```bash
@@ -430,7 +456,7 @@ npm run test:run
 
 Expected: 4 failures in `auth.test.ts`. The `auth.ts` module doesn't exist yet.
 
-- [ ] **Step 3: Implement `src/lib/auth.ts`**
+- [x] **Step 3: Implement `src/lib/auth.ts`**
 
 Create `src/lib/auth.ts`:
 
@@ -469,7 +495,7 @@ export async function requireRole(...allowed: Role[]): Promise<SessionInfo> {
 }
 ```
 
-- [ ] **Step 4: Run tests, confirm pass**
+- [x] **Step 4: Run tests, confirm pass**
 
 Run:
 ```bash
@@ -478,7 +504,7 @@ npm run test:run
 
 Expected: 5 passing (4 new + 1 sanity).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/auth.ts src/lib/__tests__/auth.test.ts

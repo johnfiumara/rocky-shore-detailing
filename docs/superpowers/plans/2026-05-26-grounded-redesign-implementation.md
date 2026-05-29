@@ -16,6 +16,16 @@
 
 ---
 
+## Status as of 2026-05-29
+
+**Not executed.** Verified by reading `src/app/globals.css` — it still defines the Coastal Luxury tokens (`--rs-ink`, `--rs-bronze`, `--rs-tide`, etc.) under the comment header `ROCKY SHORE DETAILING — Coastal Luxury theme`. The Granite Coast palette (`--rs-stone`, `--rs-paper`) this plan installs in Task 1 is nowhere in the codebase. Since Task 1 is the foundation every downstream task depends on, Tasks 2-15 are presumed not done either.
+
+Checkboxes below remain `[ ]`.
+
+**Exception — Task 9 (Gallery + BeforeAfter restyle) is superseded.** On 2026-05-29, `src/components/gallery-section.tsx` was rewritten as an Embla carousel (BeforeAfter as slide 1, the six grid images as slides 2-7) — not the paper-framed tile grid Step 1 specifies. `before-after.tsx` was *not* restyled and still uses the bone-circle handle with `‹ ›` text (Step 2 of this task is not done). If/when the rest of the Granite Coast palette ships, Task 9 Step 1 should be removed (the carousel replaces it) and Step 2 should be the only remaining work.
+
+---
+
 ## Task 1: Foundations — tokens, type, layout
 
 **Files:**
@@ -957,6 +967,8 @@ git commit -m "feat(process): vertical numbered timeline replaces GSAP pinned ho
 ---
 
 ## Task 9: Gallery + BeforeAfter restyle
+
+> **Superseded 2026-05-29.** `gallery-section.tsx` was rewritten as an Embla carousel (BeforeAfter as slide 1, six grid images as slides 2-7). Step 1 of this task no longer applies — do not restore the paper-framed tile grid. Step 2 (`before-after.tsx` ink-circle handle restyle) is still open and unblocked once the Granite Coast tokens land.
 
 **Files:**
 - Modify: `src/components/gallery-section.tsx`

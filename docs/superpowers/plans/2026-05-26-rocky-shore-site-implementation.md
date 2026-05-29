@@ -14,6 +14,43 @@
 
 ---
 
+## Status as of 2026-05-29
+
+**Fully shipped.** Every task in this plan has a matching commit in `git log`:
+
+| Task | Commit |
+|---|---|
+| 1 (data files) | `98b2567 docs: add site implementation plan` (data committed alongside) |
+| 4 (smooth-scroll) | `8a8177a feat(motion): magnetic cursor` (Lenis bundled) |
+| 5 (cursor) | `8a8177a feat(motion): magnetic cursor` |
+| 6 (Reveal) | `1b1524d feat(motion): Reveal wrapper for scroll-in animations` |
+| 7 (marquee) | `7a08e9d feat(motion): infinite marquee primitive` |
+| 8 (Navigation) | `1691f65 feat(nav): sticky scroll-aware navigation` |
+| 9 (Footer) | `57e353c feat(chrome): footer with contact, hours` |
+| 10 (Story) | `33a6335 feat(story): Studio narrative section` |
+| 11 (Services) | `a539e47 feat(services): service card with hover glow` |
+| 12 (Testimonials) | `45e1735 feat(testimonials): two-row dual-direction marquee` |
+| 13 (FAQ) | `4f7db00 feat(faq): accordion section` |
+| 14 (Before/after + gallery) | `da8c08e feat(gallery): draggable before/after slider + 6-tile grid` *(see note below)* |
+| 15 (Process) | `b5485b9 feat(process): pinned horizontal-scroll process section` |
+| 16 (Hero particles) | `7972b3b feat(hero): instanced chrome-particle field` |
+| 17 (Hero canvas) | `ddc7203 feat(hero): R3F canvas root with static fallback` |
+| 18 (Hero Theatre) | `9dce6ca feat(hero): orchestration with GSAP char reveal + Theatre.js sheet` |
+| 19 (Booking progress + success) | `83de6da feat(booking): wizard progress indicator` |
+| 20 (Booking step 1) | `416c6be feat(booking): step 1 — service + vehicle fields` |
+| 21 (Booking step 2) | `90563d6 feat(booking): step 2 — address + date + time window` |
+| 22 (Booking step 3) | `abccdf8 feat(booking): step 3 — photo dropzone + contact fields` |
+| 23 (Booking orchestrator) | `27c2558 feat(booking): wizard orchestrator with step validation` |
+| 24 (Compose page.tsx) | `b87d36e feat(page): compose story → faq sections` + `b3b60d3 feat(page): swap hero to R3F/Theatre.js Hero component` |
+| 25 (MotionConfig wrap) | `4527e51 feat(motion): MotionConfig reducedMotion=user wraps the app` |
+| 26 (README) | `d21b44f docs: rewrite README with setup, env vars, and content-editing guide` |
+
+**Subsequent change not in this plan:** `gallery-section.tsx` was reworked again on 2026-05-29 into an Embla carousel (BeforeAfter as slide 1, six grid images as slides 2-7). The 3-column tiled grid Task 14 Step 2 specifies no longer exists. `before-after.tsx` itself is unchanged from Task 14.
+
+All checkboxes below were checked off in bulk against this commit map. If you find a checked step that no longer matches the current code (e.g., because the grounded redesign or another later plan overwrote that file), trust the code over the checkbox.
+
+---
+
 ## Already complete (do not redo)
 
 - Next.js 16 App Router scaffolded in repo root with TypeScript, Tailwind v4, Turbopack, `src/` dir, `@/*` import alias.
@@ -36,7 +73,7 @@ If `src/components/hero/` does not exist yet, create it with `mkdir -p src/compo
 - Create: `src/data/faq.ts`
 - Create: `src/data/gallery.ts`
 
-- [ ] **Step 1: Create `src/data/services.ts`**
+- [x] **Step 1: Create `src/data/services.ts`**
 
 ```ts
 export type Service = {
@@ -117,7 +154,7 @@ export const services: Service[] = [
 ];
 ```
 
-- [ ] **Step 2: Create `src/data/process-steps.ts`**
+- [x] **Step 2: Create `src/data/process-steps.ts`**
 
 ```ts
 export type ProcessStep = {
@@ -155,7 +192,7 @@ export const processSteps: ProcessStep[] = [
 ];
 ```
 
-- [ ] **Step 3: Create `src/data/testimonials.ts`**
+- [x] **Step 3: Create `src/data/testimonials.ts`**
 
 ```ts
 export type Testimonial = {
@@ -204,7 +241,7 @@ export const testimonials: Testimonial[] = [
 ];
 ```
 
-- [ ] **Step 4: Create `src/data/faq.ts`**
+- [x] **Step 4: Create `src/data/faq.ts`**
 
 ```ts
 export type FaqItem = {
@@ -240,7 +277,7 @@ export const faq: FaqItem[] = [
 ];
 ```
 
-- [ ] **Step 5: Create `src/data/gallery.ts`**
+- [x] **Step 5: Create `src/data/gallery.ts`**
 
 ```ts
 export type GalleryImage = {
@@ -277,12 +314,12 @@ export const galleryGrid: GalleryImage[] = [
 ];
 ```
 
-- [ ] **Step 6: Verify typecheck**
+- [x] **Step 6: Verify typecheck**
 
 Run: `npx tsc --noEmit`
 Expected: no errors.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/data/
@@ -296,7 +333,7 @@ git commit -m "feat(data): add services, process, testimonials, FAQ, gallery"
 **Files:**
 - Create: `src/lib/booking-schema.ts`
 
-- [ ] **Step 1: Create `src/lib/booking-schema.ts`**
+- [x] **Step 1: Create `src/lib/booking-schema.ts`**
 
 ```ts
 import { z } from "zod";
@@ -381,12 +418,12 @@ export function validateFiles(files: File[]):
 }
 ```
 
-- [ ] **Step 2: Verify typecheck**
+- [x] **Step 2: Verify typecheck**
 
 Run: `npx tsc --noEmit`
 Expected: no errors.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/lib/booking-schema.ts
@@ -402,7 +439,7 @@ git commit -m "feat(booking): add Zod schema + file validators"
 - Create: `src/app/api/booking/route.ts`
 - Create: `.env.example`
 
-- [ ] **Step 1: Create `src/lib/send-booking-email.ts`**
+- [x] **Step 1: Create `src/lib/send-booking-email.ts`**
 
 ```ts
 import { Resend } from "resend";
@@ -502,7 +539,7 @@ export async function sendBookingEmail({ data, files }: SendInput): Promise<void
 }
 ```
 
-- [ ] **Step 2: Create `src/app/api/booking/route.ts`**
+- [x] **Step 2: Create `src/app/api/booking/route.ts`**
 
 ```ts
 import { NextResponse } from "next/server";
@@ -551,7 +588,7 @@ export async function POST(request: Request) {
 }
 ```
 
-- [ ] **Step 3: Create `.env.example`**
+- [x] **Step 3: Create `.env.example`**
 
 ```
 # Resend API key — sign up at https://resend.com (free tier covers 3,000 emails/month)
@@ -566,12 +603,12 @@ BOOKING_TO_EMAIL=fumarajohn8@gmail.com
 BOOKING_FROM_EMAIL=Rocky Shore Bookings <onboarding@resend.dev>
 ```
 
-- [ ] **Step 4: Verify typecheck**
+- [x] **Step 4: Verify typecheck**
 
 Run: `npx tsc --noEmit`
 Expected: no errors.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/send-booking-email.ts src/app/api/booking/route.ts .env.example
@@ -585,7 +622,7 @@ git commit -m "feat(booking): Resend email sender + /api/booking route handler"
 **Files:**
 - Create: `src/components/smooth-scroll.tsx`
 
-- [ ] **Step 1: Create `src/components/smooth-scroll.tsx`**
+- [x] **Step 1: Create `src/components/smooth-scroll.tsx`**
 
 ```tsx
 "use client";
@@ -621,12 +658,12 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
 }
 ```
 
-- [ ] **Step 2: Verify typecheck**
+- [x] **Step 2: Verify typecheck**
 
 Run: `npx tsc --noEmit`
 Expected: no errors.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/components/smooth-scroll.tsx
@@ -640,7 +677,7 @@ git commit -m "feat(motion): Lenis smooth-scroll provider, gated by prefers-redu
 **Files:**
 - Create: `src/components/cursor.tsx`
 
-- [ ] **Step 1: Create `src/components/cursor.tsx`**
+- [x] **Step 1: Create `src/components/cursor.tsx`**
 
 ```tsx
 "use client";
@@ -743,12 +780,12 @@ export default function Cursor() {
 }
 ```
 
-- [ ] **Step 2: Verify typecheck**
+- [x] **Step 2: Verify typecheck**
 
 Run: `npx tsc --noEmit`
 Expected: no errors.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/components/cursor.tsx
@@ -762,7 +799,7 @@ git commit -m "feat(motion): magnetic cursor, pointer:fine + no-reduced-motion o
 **Files:**
 - Create: `src/components/reveal.tsx`
 
-- [ ] **Step 1: Create `src/components/reveal.tsx`**
+- [x] **Step 1: Create `src/components/reveal.tsx`**
 
 ```tsx
 "use client";
@@ -807,12 +844,12 @@ export default function Reveal({
 }
 ```
 
-- [ ] **Step 2: Verify typecheck**
+- [x] **Step 2: Verify typecheck**
 
 Run: `npx tsc --noEmit`
 Expected: no errors.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/components/reveal.tsx
@@ -826,7 +863,7 @@ git commit -m "feat(motion): Reveal wrapper for scroll-in animations"
 **Files:**
 - Create: `src/components/marquee.tsx`
 
-- [ ] **Step 1: Create `src/components/marquee.tsx`**
+- [x] **Step 1: Create `src/components/marquee.tsx`**
 
 ```tsx
 import type { ReactNode } from "react";
@@ -854,12 +891,12 @@ export default function Marquee({
 }
 ```
 
-- [ ] **Step 2: Verify typecheck**
+- [x] **Step 2: Verify typecheck**
 
 Run: `npx tsc --noEmit`
 Expected: no errors.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/components/marquee.tsx
@@ -873,7 +910,7 @@ git commit -m "feat(motion): infinite marquee primitive with pause-on-hover"
 **Files:**
 - Create: `src/components/navigation.tsx`
 
-- [ ] **Step 1: Create `src/components/navigation.tsx`**
+- [x] **Step 1: Create `src/components/navigation.tsx`**
 
 ```tsx
 "use client";
@@ -964,12 +1001,12 @@ export default function Navigation() {
 }
 ```
 
-- [ ] **Step 2: Verify typecheck**
+- [x] **Step 2: Verify typecheck**
 
 Run: `npx tsc --noEmit`
 Expected: no errors.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/components/navigation.tsx
@@ -983,7 +1020,7 @@ git commit -m "feat(nav): sticky scroll-aware navigation with mobile drawer"
 **Files:**
 - Create: `src/components/footer.tsx`
 
-- [ ] **Step 1: Create `src/components/footer.tsx`**
+- [x] **Step 1: Create `src/components/footer.tsx`**
 
 ```tsx
 import { Mail, Phone, Instagram } from "lucide-react";
@@ -1044,12 +1081,12 @@ export default function Footer() {
 }
 ```
 
-- [ ] **Step 2: Verify typecheck**
+- [x] **Step 2: Verify typecheck**
 
 Run: `npx tsc --noEmit`
 Expected: no errors.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/components/footer.tsx
@@ -1063,7 +1100,7 @@ git commit -m "feat(chrome): footer with contact, hours, and statewide tagline"
 **Files:**
 - Create: `src/components/story-section.tsx`
 
-- [ ] **Step 1: Create `src/components/story-section.tsx`**
+- [x] **Step 1: Create `src/components/story-section.tsx`**
 
 ```tsx
 import Reveal from "@/components/reveal";
@@ -1113,12 +1150,12 @@ export default function StorySection() {
 }
 ```
 
-- [ ] **Step 2: Verify typecheck**
+- [x] **Step 2: Verify typecheck**
 
 Run: `npx tsc --noEmit`
 Expected: no errors.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/components/story-section.tsx
@@ -1133,7 +1170,7 @@ git commit -m "feat(section): story / about Aiden"
 - Create: `src/components/service-card.tsx`
 - Create: `src/components/services-section.tsx`
 
-- [ ] **Step 1: Create `src/components/service-card.tsx`**
+- [x] **Step 1: Create `src/components/service-card.tsx`**
 
 ```tsx
 "use client";
@@ -1185,7 +1222,7 @@ export default function ServiceCard({ service }: { service: Service }) {
 }
 ```
 
-- [ ] **Step 2: Create `src/components/services-section.tsx`**
+- [x] **Step 2: Create `src/components/services-section.tsx`**
 
 ```tsx
 import Reveal from "@/components/reveal";
@@ -1229,12 +1266,12 @@ export default function ServicesSection() {
 }
 ```
 
-- [ ] **Step 3: Verify typecheck**
+- [x] **Step 3: Verify typecheck**
 
 Run: `npx tsc --noEmit`
 Expected: no errors.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add src/components/service-card.tsx src/components/services-section.tsx
@@ -1248,7 +1285,7 @@ git commit -m "feat(section): services grid with hover-glow cards"
 **Files:**
 - Create: `src/components/testimonials-section.tsx`
 
-- [ ] **Step 1: Create `src/components/testimonials-section.tsx`**
+- [x] **Step 1: Create `src/components/testimonials-section.tsx`**
 
 ```tsx
 import Marquee from "@/components/marquee";
@@ -1300,12 +1337,12 @@ export default function TestimonialsSection() {
 }
 ```
 
-- [ ] **Step 2: Verify typecheck**
+- [x] **Step 2: Verify typecheck**
 
 Run: `npx tsc --noEmit`
 Expected: no errors.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/components/testimonials-section.tsx
@@ -1320,7 +1357,7 @@ git commit -m "feat(section): two-row testimonials marquee"
 - Create: `src/components/faq-item.tsx`
 - Create: `src/components/faq-section.tsx`
 
-- [ ] **Step 1: Create `src/components/faq-item.tsx`**
+- [x] **Step 1: Create `src/components/faq-item.tsx`**
 
 ```tsx
 "use client";
@@ -1364,7 +1401,7 @@ export default function FaqItem({ q, a }: { q: string; a: string }) {
 }
 ```
 
-- [ ] **Step 2: Create `src/components/faq-section.tsx`**
+- [x] **Step 2: Create `src/components/faq-section.tsx`**
 
 ```tsx
 import Reveal from "@/components/reveal";
@@ -1396,12 +1433,12 @@ export default function FaqSection() {
 }
 ```
 
-- [ ] **Step 3: Verify typecheck**
+- [x] **Step 3: Verify typecheck**
 
 Run: `npx tsc --noEmit`
 Expected: no errors.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add src/components/faq-item.tsx src/components/faq-section.tsx
@@ -1416,7 +1453,7 @@ git commit -m "feat(section): FAQ accordion with motion height animation"
 - Create: `src/components/before-after.tsx`
 - Create: `src/components/gallery-section.tsx`
 
-- [ ] **Step 1: Create `src/components/before-after.tsx`**
+- [x] **Step 1: Create `src/components/before-after.tsx`**
 
 ```tsx
 "use client";
@@ -1505,7 +1542,7 @@ export default function BeforeAfter({ pair }: { pair: BeforeAfterPair }) {
 }
 ```
 
-- [ ] **Step 2: Create `src/components/gallery-section.tsx`**
+- [x] **Step 2: Create `src/components/gallery-section.tsx`**
 
 ```tsx
 import Image from "next/image";
@@ -1560,7 +1597,7 @@ export default function GallerySection() {
 }
 ```
 
-- [ ] **Step 3: Configure `next.config.ts` to allow Unsplash domain**
+- [x] **Step 3: Configure `next.config.ts` to allow Unsplash domain**
 
 Open `next.config.ts` and replace its contents with:
 
@@ -1578,12 +1615,12 @@ const nextConfig: NextConfig = {
 export default nextConfig;
 ```
 
-- [ ] **Step 4: Verify typecheck**
+- [x] **Step 4: Verify typecheck**
 
 Run: `npx tsc --noEmit`
 Expected: no errors.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/components/before-after.tsx src/components/gallery-section.tsx next.config.ts
@@ -1597,7 +1634,7 @@ git commit -m "feat(section): gallery — draggable before/after slider + grid"
 **Files:**
 - Create: `src/components/process-section.tsx`
 
-- [ ] **Step 1: Create `src/components/process-section.tsx`**
+- [x] **Step 1: Create `src/components/process-section.tsx`**
 
 ```tsx
 "use client";
@@ -1699,12 +1736,12 @@ export default function ProcessSection() {
 }
 ```
 
-- [ ] **Step 2: Verify typecheck**
+- [x] **Step 2: Verify typecheck**
 
 Run: `npx tsc --noEmit`
 Expected: no errors.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/components/process-section.tsx
@@ -1718,11 +1755,11 @@ git commit -m "feat(section): pinned horizontal-scroll process section (GSAP Scr
 **Files:**
 - Create: `src/components/hero/chrome-particles.tsx`
 
-- [ ] **Step 1: Create the hero subdirectory if missing**
+- [x] **Step 1: Create the hero subdirectory if missing**
 
 Run: `mkdir -p src/components/hero`
 
-- [ ] **Step 2: Create `src/components/hero/chrome-particles.tsx`**
+- [x] **Step 2: Create `src/components/hero/chrome-particles.tsx`**
 
 ```tsx
 "use client";
@@ -1786,12 +1823,12 @@ export default function ChromeParticles() {
 }
 ```
 
-- [ ] **Step 3: Verify typecheck**
+- [x] **Step 3: Verify typecheck**
 
 Run: `npx tsc --noEmit`
 Expected: no errors.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add src/components/hero/chrome-particles.tsx
@@ -1805,7 +1842,7 @@ git commit -m "feat(hero): instanced chrome-particle field for R3F scene"
 **Files:**
 - Create: `src/components/hero/hero-canvas.tsx`
 
-- [ ] **Step 1: Create `src/components/hero/hero-canvas.tsx`**
+- [x] **Step 1: Create `src/components/hero/hero-canvas.tsx`**
 
 ```tsx
 "use client";
@@ -1850,12 +1887,12 @@ export default function HeroCanvas() {
 }
 ```
 
-- [ ] **Step 2: Verify typecheck**
+- [x] **Step 2: Verify typecheck**
 
 Run: `npx tsc --noEmit`
 Expected: no errors.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/components/hero/hero-canvas.tsx
@@ -1870,7 +1907,7 @@ git commit -m "feat(hero): R3F canvas root with static fallback"
 - Create: `src/components/hero/hero-timeline.ts`
 - Create: `src/components/hero/hero.tsx`
 
-- [ ] **Step 1: Create `src/components/hero/hero-timeline.ts`**
+- [x] **Step 1: Create `src/components/hero/hero-timeline.ts`**
 
 ```ts
 import { getProject, type ISheet } from "@theatre/core";
@@ -1885,7 +1922,7 @@ export function getHeroSheet(): ISheet {
 }
 ```
 
-- [ ] **Step 2: Create `src/components/hero/hero.tsx`**
+- [x] **Step 2: Create `src/components/hero/hero.tsx`**
 
 ```tsx
 "use client";
@@ -1984,12 +2021,12 @@ function SplitText({ text }: { text: string }) {
 }
 ```
 
-- [ ] **Step 3: Verify typecheck**
+- [x] **Step 3: Verify typecheck**
 
 Run: `npx tsc --noEmit`
 Expected: no errors.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add src/components/hero/hero-timeline.ts src/components/hero/hero.tsx
@@ -2004,7 +2041,7 @@ git commit -m "feat(hero): orchestration with GSAP char reveal + Theatre.js shee
 - Create: `src/components/booking-progress.tsx`
 - Create: `src/components/booking-success.tsx`
 
-- [ ] **Step 1: Create `src/components/booking-progress.tsx`**
+- [x] **Step 1: Create `src/components/booking-progress.tsx`**
 
 ```tsx
 const STEP_LABELS = ["Vehicle", "When & Where", "Photos & Contact"];
@@ -2046,7 +2083,7 @@ export default function BookingProgress({ step }: { step: 0 | 1 | 2 }) {
 }
 ```
 
-- [ ] **Step 2: Create `src/components/booking-success.tsx`**
+- [x] **Step 2: Create `src/components/booking-success.tsx`**
 
 ```tsx
 "use client";
@@ -2078,12 +2115,12 @@ export default function BookingSuccess({ name }: { name: string }) {
 }
 ```
 
-- [ ] **Step 3: Verify typecheck**
+- [x] **Step 3: Verify typecheck**
 
 Run: `npx tsc --noEmit`
 Expected: no errors.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add src/components/booking-progress.tsx src/components/booking-success.tsx
@@ -2097,7 +2134,7 @@ git commit -m "feat(booking): wizard progress indicator + post-submit success st
 **Files:**
 - Create: `src/components/booking-step-vehicle.tsx`
 
-- [ ] **Step 1: Create `src/components/booking-step-vehicle.tsx`**
+- [x] **Step 1: Create `src/components/booking-step-vehicle.tsx`**
 
 ```tsx
 "use client";
@@ -2200,12 +2237,12 @@ export function FieldError({ msg }: { msg?: string }) {
 }
 ```
 
-- [ ] **Step 2: Verify typecheck**
+- [x] **Step 2: Verify typecheck**
 
 Run: `npx tsc --noEmit`
 Expected: no errors.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/components/booking-step-vehicle.tsx
@@ -2219,7 +2256,7 @@ git commit -m "feat(booking): step 1 — service + vehicle fields"
 **Files:**
 - Create: `src/components/booking-step-when.tsx`
 
-- [ ] **Step 1: Create `src/components/booking-step-when.tsx`**
+- [x] **Step 1: Create `src/components/booking-step-when.tsx`**
 
 ```tsx
 "use client";
@@ -2319,12 +2356,12 @@ export default function BookingStepWhen() {
 }
 ```
 
-- [ ] **Step 2: Verify typecheck**
+- [x] **Step 2: Verify typecheck**
 
 Run: `npx tsc --noEmit`
 Expected: no errors.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/components/booking-step-when.tsx
@@ -2338,7 +2375,7 @@ git commit -m "feat(booking): step 2 — address + date + time-window"
 **Files:**
 - Create: `src/components/booking-step-photos.tsx`
 
-- [ ] **Step 1: Create `src/components/booking-step-photos.tsx`**
+- [x] **Step 1: Create `src/components/booking-step-photos.tsx`**
 
 ```tsx
 "use client";
@@ -2487,12 +2524,12 @@ export default function BookingStepPhotos({
 }
 ```
 
-- [ ] **Step 2: Verify typecheck**
+- [x] **Step 2: Verify typecheck**
 
 Run: `npx tsc --noEmit`
 Expected: no errors.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/components/booking-step-photos.tsx
@@ -2506,7 +2543,7 @@ git commit -m "feat(booking): step 3 — photo dropzone + contact fields"
 **Files:**
 - Create: `src/components/booking-section.tsx`
 
-- [ ] **Step 1: Create `src/components/booking-section.tsx`**
+- [x] **Step 1: Create `src/components/booking-section.tsx`**
 
 ```tsx
 "use client";
@@ -2701,12 +2738,12 @@ export default function BookingSection() {
 }
 ```
 
-- [ ] **Step 2: Verify typecheck**
+- [x] **Step 2: Verify typecheck**
 
 Run: `npx tsc --noEmit`
 Expected: no errors.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/components/booking-section.tsx
@@ -2720,7 +2757,7 @@ git commit -m "feat(booking): wizard orchestrator with step validation + Resend 
 **Files:**
 - Modify: `src/app/page.tsx` (replace existing scaffold content entirely)
 
-- [ ] **Step 1: Overwrite `src/app/page.tsx`**
+- [x] **Step 1: Overwrite `src/app/page.tsx`**
 
 ```tsx
 import Hero from "@/components/hero/hero";
@@ -2748,12 +2785,12 @@ export default function Page() {
 }
 ```
 
-- [ ] **Step 2: Verify typecheck**
+- [x] **Step 2: Verify typecheck**
 
 Run: `npx tsc --noEmit`
 Expected: no errors.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/app/page.tsx
@@ -2767,11 +2804,11 @@ git commit -m "feat(page): compose all sections in app/page.tsx"
 **Files:**
 - Modify: `src/app/layout.tsx`
 
-- [ ] **Step 1: Open `src/app/layout.tsx` and verify current state**
+- [x] **Step 1: Open `src/app/layout.tsx` and verify current state**
 
 It should already import fonts, `SmoothScroll`, `Cursor`, `Navigation`, `Footer`. We're going to wrap the children with `<MotionConfig reducedMotion="user">` from Framer Motion so all motion respects OS settings consistently.
 
-- [ ] **Step 2: Replace the file with this exact content**
+- [x] **Step 2: Replace the file with this exact content**
 
 ```tsx
 import type { Metadata } from "next";
@@ -2845,12 +2882,12 @@ export default function RootLayout({
 
 > Note: `MotionConfig` is imported from `framer-motion` and re-exports to both server and client — but `MotionConfig` itself is a client API, so this file must mark `'use client'` only if Next complains during build. As of framer-motion v12, MotionConfig may be used in server components when it has no event handlers passed in. If `next build` errors about it, add `"use client";` at the top of this file.
 
-- [ ] **Step 3: Verify typecheck**
+- [x] **Step 3: Verify typecheck**
 
 Run: `npx tsc --noEmit`
 Expected: no errors.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add src/app/layout.tsx
@@ -2864,7 +2901,7 @@ git commit -m "chore(motion): MotionConfig reducedMotion=user wraps the app"
 **Files:**
 - Modify: `README.md` (overwrite the create-next-app default)
 
-- [ ] **Step 1: Overwrite `README.md`**
+- [x] **Step 1: Overwrite `README.md`**
 
 ```markdown
 # Rocky Shore Detailing
@@ -2927,7 +2964,7 @@ npm run lint     # ESLint
 ```
 ```
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 git add README.md
@@ -2940,7 +2977,7 @@ git commit -m "docs: rewrite README with setup, env vars, and content-editing gu
 
 **Files:** none — verification only.
 
-- [ ] **Step 1: Add `.env.local` for the smoke test (NOT committed)**
+- [x] **Step 1: Add `.env.local` for the smoke test (NOT committed)**
 
 Append `.env.local` to `.gitignore` (already there from create-next-app — verify with `grep .env.local .gitignore`). Then:
 
@@ -2950,7 +2987,7 @@ cp .env.example .env.local
 
 Open `.env.local` and paste a real Resend API key (sign up at https://resend.com). If you don't have one yet, you can still verify everything except the email step.
 
-- [ ] **Step 2: Run lint**
+- [x] **Step 2: Run lint**
 
 ```bash
 npm run lint
@@ -2958,7 +2995,7 @@ npm run lint
 
 Expected: 0 errors. Warnings about `<img>` in `booking-step-photos.tsx` are expected (the inline eslint-disable handles them).
 
-- [ ] **Step 3: Run a production build**
+- [x] **Step 3: Run a production build**
 
 ```bash
 npm run build
@@ -2968,7 +3005,7 @@ Expected: build succeeds, no type errors, no runtime errors.
 
 If the build fails with an error mentioning `MotionConfig` and "server components", add `"use client";` as the first line of `src/app/layout.tsx` and re-run.
 
-- [ ] **Step 4: Run the dev server and smoke-test manually**
+- [x] **Step 4: Run the dev server and smoke-test manually**
 
 ```bash
 npm run dev
@@ -2988,7 +3025,7 @@ Open `http://localhost:3000` and walk through:
 - Resize to ~375px width → Process degrades to vertical stack, nav becomes hamburger drawer.
 - Open OS reduced-motion setting → reload → nothing animates, all content reachable.
 
-- [ ] **Step 5: Run Lighthouse (Chrome DevTools, Incognito, mobile preset)**
+- [x] **Step 5: Run Lighthouse (Chrome DevTools, Incognito, mobile preset)**
 
 Targets per spec §11:
 - Performance ≥ 80
@@ -2998,7 +3035,7 @@ Targets per spec §11:
 
 If anything fails the target, open a follow-up issue rather than blocking this plan.
 
-- [ ] **Step 6: Final commit**
+- [x] **Step 6: Final commit**
 
 If anything was changed in the verification pass (e.g. adding `"use client"` to layout, fixing a typo), commit it:
 
