@@ -2,57 +2,59 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
-import bcrypt from "bcryptjs";
 import { BookingStatus } from "@prisma/client";
+import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import {
-  requireSession,
-  createSession,
-  sessionCookieOptions,
-  clearSessionCookie,
-} from "@/lib/session";
+import { requireRole } from "@/lib/auth";
+import { supabaseServer } from "@/lib/supabase/server";
 
 // ─── Auth ───────────────────────────────────────────────────────────────────
 
+const loginSchema = z.object({
+  email: z.string().email("Enter a valid email"),
+  password: z.string().min(1, "Password is required"),
+});
+
 export async function login(_: unknown, formData: FormData) {
-  const password = formData.get("password");
-  if (typeof password !== "string") return { error: "Invalid request" };
+  const parsed = loginSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password"),
+  });
+  if (!parsed.success) {
+    const first = parsed.error.flatten().fieldErrors;
+    return { error: first.email?.[0] ?? first.password?.[0] ?? "Invalid form" };
+  }
 
-  const hash = process.env.ADMIN_PASSWORD_HASH ?? "";
-  const ok = await bcrypt.compare(password, hash);
-  if (!ok) return { error: "Incorrect password" };
-
-  const token = await createSession();
-  const jar = await cookies();
-  jar.set(sessionCookieOptions(token));
+  const supabase = await supabaseServer();
+  const { error } = await supabase.auth.signInWithPassword(parsed.data);
+  if (error) return { error: "Incorrect email or password" };
 
   redirect("/admin");
 }
 
 export async function logout() {
-  const jar = await cookies();
-  jar.set(clearSessionCookie());
+  const supabase = await supabaseServer();
+  await supabase.auth.signOut();
   redirect("/admin/login");
 }
 
 // ─── Bookings ───────────────────────────────────────────────────────────────
 
 export async function updateBookingStatus(id: string, status: BookingStatus) {
-  await requireSession();
+  await requireRole("admin");
   await prisma.booking.update({ where: { id }, data: { status } });
   revalidatePath("/admin/bookings");
   revalidatePath(`/admin/bookings/${id}`);
 }
 
 export async function updateBookingAdminNotes(id: string, adminNotes: string) {
-  await requireSession();
+  await requireRole("admin");
   await prisma.booking.update({ where: { id }, data: { adminNotes } });
   revalidatePath(`/admin/bookings/${id}`);
 }
 
 export async function updateBookingPrice(id: string, price: number) {
-  await requireSession();
+  await requireRole("admin");
   await prisma.booking.update({ where: { id }, data: { price } });
   revalidatePath(`/admin/bookings/${id}`);
 }
@@ -60,7 +62,7 @@ export async function updateBookingPrice(id: string, price: number) {
 // ─── Customers ──────────────────────────────────────────────────────────────
 
 export async function updateCustomerNotes(id: string, notes: string) {
-  await requireSession();
+  await requireRole("admin");
   await prisma.customer.update({ where: { id }, data: { notes } });
   revalidatePath(`/admin/customers/${id}`);
 }
@@ -68,13 +70,13 @@ export async function updateCustomerNotes(id: string, notes: string) {
 // ─── Content: Services ──────────────────────────────────────────────────────
 
 export async function updateServiceTierPrice(tierId: string, price: number) {
-  await requireSession();
+  await requireRole("admin", "editor");
   await prisma.serviceTier.update({ where: { id: tierId }, data: { price } });
   revalidatePath("/admin/content");
 }
 
 export async function toggleServiceActive(serviceId: string, active: boolean) {
-  await requireSession();
+  await requireRole("admin", "editor");
   await prisma.service.update({ where: { id: serviceId }, data: { active } });
   revalidatePath("/admin/content");
 }
@@ -82,7 +84,7 @@ export async function toggleServiceActive(serviceId: string, active: boolean) {
 // ─── Content: Testimonials ───────────────────────────────────────────────────
 
 export async function createTestimonial(_: unknown, formData: FormData) {
-  await requireSession();
+  await requireRole("admin", "editor");
   const quote = formData.get("quote") as string;
   const name = formData.get("name") as string;
   const context = formData.get("context") as string;
@@ -93,13 +95,13 @@ export async function createTestimonial(_: unknown, formData: FormData) {
 }
 
 export async function deleteTestimonial(id: string) {
-  await requireSession();
+  await requireRole("admin", "editor");
   await prisma.testimonial.delete({ where: { id } });
   revalidatePath("/admin/content");
 }
 
 export async function toggleTestimonialPublished(id: string, published: boolean) {
-  await requireSession();
+  await requireRole("admin", "editor");
   await prisma.testimonial.update({ where: { id }, data: { published } });
   revalidatePath("/admin/content");
 }
@@ -107,7 +109,7 @@ export async function toggleTestimonialPublished(id: string, published: boolean)
 // ─── Content: FAQ ────────────────────────────────────────────────────────────
 
 export async function createFaqItem(_: unknown, formData: FormData) {
-  await requireSession();
+  await requireRole("admin", "editor");
   const question = formData.get("question") as string;
   const answer = formData.get("answer") as string;
   if (!question || !answer) return { error: "All fields are required" };
@@ -117,7 +119,7 @@ export async function createFaqItem(_: unknown, formData: FormData) {
 }
 
 export async function deleteFaqItem(id: string) {
-  await requireSession();
+  await requireRole("admin", "editor");
   await prisma.faqItem.delete({ where: { id } });
   revalidatePath("/admin/content");
 }

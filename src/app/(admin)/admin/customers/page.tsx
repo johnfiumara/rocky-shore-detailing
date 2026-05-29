@@ -1,4 +1,4 @@
-import { requireSession } from "@/lib/session";
+import { requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { formatDate } from "@/lib/format";
@@ -6,7 +6,7 @@ import { formatDate } from "@/lib/format";
 export const metadata = { title: "Customers" };
 
 export default async function CustomersPage() {
-  await requireSession();
+  await requireRole("admin");
 
   const customers = await prisma.customer.findMany({
     orderBy: { createdAt: "desc" },

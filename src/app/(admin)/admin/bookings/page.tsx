@@ -1,4 +1,4 @@
-import { requireSession } from "@/lib/session";
+import { requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { BookingStatus } from "@prisma/client";
 import Link from "next/link";
@@ -24,7 +24,7 @@ export default async function BookingsPage({
 }: {
   searchParams: Promise<{ status?: string }>;
 }) {
-  await requireSession();
+  await requireRole("admin");
   const { status } = await searchParams;
 
   const bookings = await prisma.booking.findMany({

@@ -1,11 +1,11 @@
-import { requireSession } from "@/lib/session";
+import { requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Image from "next/image";
 
 export const metadata = { title: "Gallery" };
 
 export default async function GalleryAdminPage() {
-  await requireSession();
+  await requireRole("admin", "editor");
 
   const images = await prisma.galleryImage.findMany({
     orderBy: [{ vehicleId: "asc" }, { sortOrder: "asc" }],

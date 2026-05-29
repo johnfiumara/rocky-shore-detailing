@@ -1,4 +1,4 @@
-import { requireSession } from "@/lib/session";
+import { requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import ServicesTable from "./services-table";
 import TestimonialsManager from "./testimonials-manager";
@@ -7,7 +7,7 @@ import FaqManager from "./faq-manager";
 export const metadata = { title: "Content" };
 
 export default async function ContentPage() {
-  await requireSession();
+  await requireRole("admin", "editor");
 
   const [services, testimonials, faqItems] = await Promise.all([
     prisma.service.findMany({

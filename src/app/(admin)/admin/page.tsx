@@ -1,4 +1,4 @@
-import { requireSession } from "@/lib/session";
+import { requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { BookingStatus } from "@prisma/client";
 import Link from "next/link";
@@ -7,7 +7,7 @@ import { formatDate } from "@/lib/format";
 export const metadata = { title: "Dashboard" };
 
 export default async function AdminDashboard() {
-  await requireSession();
+  await requireRole("admin", "editor");
 
   const [pendingCount, confirmedCount, customerCount, recentBookings] = await Promise.all([
     prisma.booking.count({ where: { status: BookingStatus.PENDING } }),

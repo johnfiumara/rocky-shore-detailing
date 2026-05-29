@@ -1,12 +1,12 @@
-import { getSession } from "@/lib/session";
+import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import LoginForm from "./login-form";
 
 export const metadata = { title: "Admin Login · Rocky Shore Detailing" };
 
 export default async function LoginPage() {
-  const ok = await getSession();
-  if (ok) redirect("/admin");
+  const session = await getCurrentUser();
+  if (session) redirect("/admin");
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-ink px-4">

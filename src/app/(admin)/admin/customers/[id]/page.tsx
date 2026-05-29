@@ -1,4 +1,4 @@
-import { requireSession } from "@/lib/session";
+import { requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -11,7 +11,7 @@ export default async function CustomerDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requireSession();
+  await requireRole("admin");
   const { id } = await params;
 
   const customer = await prisma.customer.findUnique({

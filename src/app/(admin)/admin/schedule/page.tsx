@@ -1,4 +1,4 @@
-import { requireSession } from "@/lib/session";
+import { requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { formatDate, formatTime } from "@/lib/format";
@@ -17,7 +17,7 @@ export default async function SchedulePage({
 }: {
   searchParams: Promise<{ month?: string; year?: string }>;
 }) {
-  await requireSession();
+  await requireRole("admin");
 
   const sp = await searchParams;
   const now = new Date();
