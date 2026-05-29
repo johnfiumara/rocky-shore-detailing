@@ -1,33 +1,48 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { jwtVerify } from "jose";
+import { createServerClient } from "@supabase/ssr";
 
-const COOKIE_NAME = "rsd_admin_session";
 const PUBLIC_ADMIN_PATHS = ["/admin/login"];
 
-function getSecret() {
-  const secret = process.env.ADMIN_JWT_SECRET;
-  if (!secret) throw new Error("ADMIN_JWT_SECRET is not set");
-  return new TextEncoder().encode(secret);
+function requiredEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) throw new Error(`${name} is not set`);
+  return value;
 }
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (!pathname.startsWith("/admin")) return NextResponse.next();
-  if (PUBLIC_ADMIN_PATHS.some((p) => pathname.startsWith(p))) return NextResponse.next();
-
-  const token = request.cookies.get(COOKIE_NAME)?.value;
-  if (!token) {
-    return NextResponse.redirect(new URL("/admin/login", request.url));
-  }
-
-  try {
-    await jwtVerify(token, getSecret());
+  if (PUBLIC_ADMIN_PATHS.some((p) => pathname.startsWith(p))) {
     return NextResponse.next();
-  } catch {
+  }
+
+  const response = NextResponse.next();
+
+  const supabase = createServerClient(
+    requiredEnv("NEXT_PUBLIC_SUPABASE_URL"),
+    requiredEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(toSet) {
+          for (const { name, value, options } of toSet) {
+            response.cookies.set(name, value, options);
+          }
+        },
+      },
+    },
+  );
+
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data?.user) {
     return NextResponse.redirect(new URL("/admin/login", request.url));
   }
+
+  return response;
 }
 
 export const config = {
