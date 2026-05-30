@@ -19,10 +19,23 @@ do $$ begin
     using (user_id = auth.uid());
 exception when duplicate_object then null; end $$;
 
--- Only admins can insert / update / delete role rows.
+-- Only admins can insert / update / delete role rows. Scoped to write
+-- commands so this policy's USING subquery doesn't re-trigger itself on
+-- the user's own SELECT (Postgres RLS recursion).
 do $$ begin
-  create policy user_role_admin_write on public.user_role
-    for all
+  create policy user_role_admin_insert on public.user_role
+    for insert
+    with check (
+      exists (
+        select 1 from public.user_role ur
+        where ur.user_id = auth.uid() and ur.role = 'admin'
+      )
+    );
+exception when duplicate_object then null; end $$;
+
+do $$ begin
+  create policy user_role_admin_update on public.user_role
+    for update
     using (
       exists (
         select 1 from public.user_role ur
@@ -30,6 +43,17 @@ do $$ begin
       )
     )
     with check (
+      exists (
+        select 1 from public.user_role ur
+        where ur.user_id = auth.uid() and ur.role = 'admin'
+      )
+    );
+exception when duplicate_object then null; end $$;
+
+do $$ begin
+  create policy user_role_admin_delete on public.user_role
+    for delete
+    using (
       exists (
         select 1 from public.user_role ur
         where ur.user_id = auth.uid() and ur.role = 'admin'
