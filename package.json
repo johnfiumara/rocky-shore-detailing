@@ -19,7 +19,8 @@
     "cms:seed:testimonials": "tsx scripts/seed-testimonials.ts",
     "cms:seed:faq": "tsx scripts/seed-faq.ts",
     "cms:seed:process": "tsx scripts/seed-process-steps.ts",
-    "cms:seed": "npm run cms:seed:services && npm run cms:seed:testimonials && npm run cms:seed:faq && npm run cms:seed:process",
+    "cms:seed:gallery": "tsx scripts/seed-gallery.ts",
+    "cms:seed": "npm run cms:seed:services && npm run cms:seed:testimonials && npm run cms:seed:faq && npm run cms:seed:process && npm run cms:seed:gallery && npm run cms:seed:settings",
     "cms:seed:settings": "tsx scripts/seed-settings.ts"
   },
   "prisma": {
