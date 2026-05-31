@@ -57,12 +57,17 @@ export default async function SchedulePage({
 
   return (
     <div className="p-6 md:p-8 pt-20 md:pt-8 max-w-5xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
         <h1 className="text-2xl font-display text-bone">Schedule</h1>
-        <div className="flex items-center gap-3 text-sm">
-          <Link href={`/admin/schedule?month=${prevMonth.month}&year=${prevMonth.year}`} className="text-bone-dim hover:text-bone transition-colors px-2">←</Link>
-          <span className="text-bone">{MONTHS[month]} {year}</span>
-          <Link href={`/admin/schedule?month=${nextMonth.month}&year=${nextMonth.year}`} className="text-bone-dim hover:text-bone transition-colors px-2">→</Link>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 text-sm">
+            <Link href={`/admin/schedule?month=${prevMonth.month}&year=${prevMonth.year}`} className="text-bone-dim hover:text-bone transition-colors px-2">←</Link>
+            <span className="text-bone">{MONTHS[month]} {year}</span>
+            <Link href={`/admin/schedule?month=${nextMonth.month}&year=${nextMonth.year}`} className="text-bone-dim hover:text-bone transition-colors px-2">→</Link>
+          </div>
+          <Link href="/admin/bookings/new" className="btn-primary text-sm">
+            + New booking
+          </Link>
         </div>
       </div>
 

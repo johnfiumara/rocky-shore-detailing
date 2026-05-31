@@ -15,6 +15,8 @@ import {
   Images,
   Settings,
   ShieldCheck,
+  Receipt,
+  PiggyBank,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -23,6 +25,8 @@ const NAV = [
   { href: "/admin/schedule", label: "Schedule", icon: CalendarDays },
   { href: "/admin/bookings", label: "Bookings", icon: FileText },
   { href: "/admin/customers", label: "Customers", icon: Users },
+  { href: "/admin/expenses", label: "Expenses", icon: Receipt },
+  { href: "/admin/budget", label: "Budget", icon: PiggyBank },
   { href: "/admin/gallery", label: "Gallery", icon: Image },
   { href: "/admin/media", label: "Media", icon: Images },
   { href: "/admin/content", label: "Content", icon: FileText },

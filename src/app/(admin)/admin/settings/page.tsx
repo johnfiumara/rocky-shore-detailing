@@ -1,6 +1,7 @@
 import { requireRole } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import PasswordForm from "./password-form";
 
 export const metadata = { title: "Settings" };
 
@@ -39,8 +40,10 @@ export default async function SettingsPage() {
   ];
 
   return (
-    <div className="p-6 md:p-8 pt-20 md:pt-8 max-w-3xl mx-auto space-y-8">
-      <h1 className="text-2xl font-display text-bone">Site Settings</h1>
+    <div className="p-6 md:p-8 pt-20 md:pt-8 max-w-3xl mx-auto space-y-10">
+      <div>
+        <h1 className="text-2xl font-display text-bone">Site Settings</h1>
+      </div>
 
       <div className="space-y-4">
         {knownKeys.map((key) => {
@@ -60,6 +63,12 @@ export default async function SettingsPage() {
           );
         })}
       </div>
+
+      <section className="space-y-3 pt-4 border-t border-line">
+        <h2 className="text-lg font-display text-bone">Account</h2>
+        <p className="text-bone-dim text-xs">Change the password for your sign-in.</p>
+        <PasswordForm />
+      </section>
     </div>
   );
 }

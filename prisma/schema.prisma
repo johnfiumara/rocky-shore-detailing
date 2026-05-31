@@ -7,18 +7,46 @@ datasource db {
 }
 
 model Customer {
-  id        String    @id @default(cuid())
+  id        String            @id @default(cuid())
   name      String
-  email     String    @unique
+  email     String            @unique
   phone     String?
   address   String?
   city      String?
   zip       String?
   notes     String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
   vehicles  Vehicle[]
   bookings  Booking[]
+  messages  CustomerMessage[]
+}
+
+model CustomerMessage {
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  bookingId  String?
+  channel    String
+  direction  String
+  body       String
+  createdAt  DateTime @default(now())
+
+  @@index([customerId, createdAt])
+}
+
+model Expense {
+  id          String   @id @default(cuid())
+  date        DateTime @db.Date
+  category    String
+  description String
+  amount      Float
+  vendor      String?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([date])
 }
 
 model Vehicle {

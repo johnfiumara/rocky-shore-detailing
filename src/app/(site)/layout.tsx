@@ -28,7 +28,7 @@ const jetbrains = JetBrains_Mono({
 });
 
 // JSON-LD Structured Data for LocalBusiness
-export const localBusinessJsonLd = {
+const localBusinessJsonLd = {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
   "@id": "https://rockyshoredetailing.com",
@@ -53,7 +53,7 @@ export const localBusinessJsonLd = {
 };
 
 // JSON-LD Structured Data for Services
-export const servicesJsonLd = {
+const servicesJsonLd = {
   "@context": "https://schema.org",
   "@type": "ItemList",
   "itemListElement": [

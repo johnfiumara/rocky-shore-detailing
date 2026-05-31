@@ -35,8 +35,11 @@ export default async function BookingsPage({
 
   return (
     <div className="p-6 md:p-8 pt-20 md:pt-8 max-w-5xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <h1 className="text-2xl font-display text-bone">Bookings</h1>
+        <Link href="/admin/bookings/new" className="btn-primary text-sm">
+          + New booking
+        </Link>
       </div>
 
       {/* Status filter */}
