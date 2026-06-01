@@ -20,8 +20,14 @@ export async function supabaseServer() {
           return cookieStore.getAll();
         },
         setAll(toSet) {
-          for (const { name, value, options } of toSet) {
-            cookieStore.set(name, value, options);
+          // Server Components can't set cookies. The proxy refreshes the
+          // session on every request, so swallowing here is safe.
+          try {
+            for (const { name, value, options } of toSet) {
+              cookieStore.set(name, value, options);
+            }
+          } catch {
+            // called from a Server Component
           }
         },
       },
