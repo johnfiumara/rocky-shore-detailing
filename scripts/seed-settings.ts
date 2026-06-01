@@ -1,4 +1,5 @@
-import "dotenv/config";
+import { config as dotenvConfig } from "dotenv";
+dotenvConfig({ path: ".env.local" });
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
@@ -26,6 +27,7 @@ async function main() {
     },
     { key: "hero.headline", value: "Glass-deep" },
     { key: "hero.subheadline", value: "finish, by hand." },
+    { key: "gallery.before_after_label", value: "Recent detail · client pickup" },
   ];
 
   for (const s of settings) {
