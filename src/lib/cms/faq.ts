@@ -12,9 +12,19 @@ export async function getFaq(): Promise<CmsFaqItem[]> {
       .eq("published", true)
       .order("sortOrder");
 
-    if (error || !data || data.length === 0) return staticFaq;
+    if (error || !data || data.length === 0) {
+      console.warn("[cms:faq] No FAQ items found, using static fallback", {
+        error: error?.message,
+        timestamp: new Date().toISOString(),
+      });
+      return staticFaq;
+    }
     return data.map((r: { question: string; answer: string }) => ({ q: r.question, a: r.answer }));
-  } catch {
+  } catch (err) {
+    console.error("[cms:faq] Failed to fetch FAQ items", {
+      error: err instanceof Error ? err.message : String(err),
+      timestamp: new Date().toISOString(),
+    });
     return staticFaq;
   }
 }

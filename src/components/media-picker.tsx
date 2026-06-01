@@ -96,7 +96,8 @@ export default function MediaPicker({
       onChange(id);
       fetchAssets();
     } catch (err) {
-      console.error("Upload error:", err);
+      const { logger } = await import("@/lib/logger");
+      logger.error("media-picker", "Upload error", err);
     } finally {
       setUploading(false);
     }

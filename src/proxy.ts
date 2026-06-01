@@ -13,12 +13,16 @@ function requiredEnv(name: string): string {
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (!pathname.startsWith("/admin")) return NextResponse.next();
+  if (!pathname.startsWith("/admin")) return NextResponse.next({ request });
   if (PUBLIC_ADMIN_PATHS.some((p) => pathname.startsWith(p))) {
-    return NextResponse.next();
+    return NextResponse.next({ request });
   }
 
-  const response = NextResponse.next();
+  // Canonical Supabase SSR middleware pattern: response is rebuilt inside
+  // setAll so refreshed cookies propagate both to the next handler (via
+  // request) and back to the browser (via response). See:
+  // https://supabase.com/docs/guides/auth/server-side/nextjs
+  let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
     requiredEnv("NEXT_PUBLIC_SUPABASE_URL"),
@@ -28,21 +32,33 @@ export async function proxy(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll(toSet) {
-          for (const { name, value, options } of toSet) {
-            response.cookies.set(name, value, options);
-          }
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value),
+          );
+          supabaseResponse = NextResponse.next({ request });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options),
+          );
         },
       },
     },
   );
 
+  // IMPORTANT: nothing between createServerClient and getUser() — Supabase
+  // docs warn this can cause subtle session-loss bugs.
   const { data, error } = await supabase.auth.getUser();
   if (error || !data?.user) {
-    return NextResponse.redirect(new URL("/admin/login", request.url));
+    // Copy any refreshed cookies onto the redirect so the next request
+    // doesn't get stuck in a bounce loop.
+    const redirect = NextResponse.redirect(new URL("/admin/login", request.url));
+    supabaseResponse.cookies.getAll().forEach((c) =>
+      redirect.cookies.set(c.name, c.value, c),
+    );
+    return redirect;
   }
 
-  return response;
+  return supabaseResponse;
 }
 
 export const config = {

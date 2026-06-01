@@ -15,9 +15,19 @@ export async function getGalleryImages(): Promise<CmsGalleryImage[]> {
       .select("src, alt")
       .eq("published", true)
       .order("sortOrder");
-    if (error || !data || data.length === 0) return staticGrid;
+    if (error || !data || data.length === 0) {
+      console.warn("[cms:gallery] No gallery images found, using static fallback", {
+        error: error?.message,
+        timestamp: new Date().toISOString(),
+      });
+      return staticGrid;
+    }
     return data as CmsGalleryImage[];
-  } catch {
+  } catch (err) {
+    console.error("[cms:gallery] Failed to fetch gallery images", {
+      error: err instanceof Error ? err.message : String(err),
+      timestamp: new Date().toISOString(),
+    });
     return staticGrid;
   }
 }
@@ -38,14 +48,20 @@ export async function getBeforeAfterPair(): Promise<BeforeAfterPair> {
       .select("src, alt, vehicleId, isBefore, isAfter, sortOrder")
       .eq("published", true)
       .order("sortOrder");
-    if (error || !data || data.length === 0) return staticPair;
+    if (error || !data || data.length === 0) {
+      console.warn("[cms:gallery] No before/after images found, using static fallback", {
+        error: error?.message,
+        timestamp: new Date().toISOString(),
+      });
+      return staticPair;
+    }
 
     const rows = data as PairRow[];
     const before = rows.find((r) => r.isBefore);
     if (!before) {
-      if (process.env.NODE_ENV === "development") {
-        console.warn("[gallery] No GalleryImage marked isBefore=true — using static pair.");
-      }
+      console.warn("[cms:gallery] No GalleryImage marked isBefore=true — using static pair", {
+        timestamp: new Date().toISOString(),
+      });
       return staticPair;
     }
 
@@ -53,9 +69,9 @@ export async function getBeforeAfterPair(): Promise<BeforeAfterPair> {
       rows.find((r) => r.isAfter && r.vehicleId && r.vehicleId === before.vehicleId) ??
       rows.find((r) => r.isAfter);
     if (!after) {
-      if (process.env.NODE_ENV === "development") {
-        console.warn("[gallery] No GalleryImage marked isAfter=true — using static pair.");
-      }
+      console.warn("[cms:gallery] No GalleryImage marked isAfter=true — using static pair", {
+        timestamp: new Date().toISOString(),
+      });
       return staticPair;
     }
 
@@ -66,7 +82,11 @@ export async function getBeforeAfterPair(): Promise<BeforeAfterPair> {
       before: { src: before.src, alt: before.alt },
       after: { src: after.src, alt: after.alt },
     };
-  } catch {
+  } catch (err) {
+    console.error("[cms:gallery] Failed to fetch before/after pair", {
+      error: err instanceof Error ? err.message : String(err),
+      timestamp: new Date().toISOString(),
+    });
     return staticPair;
   }
 }

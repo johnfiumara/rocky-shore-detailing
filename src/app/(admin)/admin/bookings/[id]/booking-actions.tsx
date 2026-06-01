@@ -3,6 +3,7 @@
 import { useOptimistic, useTransition, useState } from "react";
 import { BookingStatus } from "@prisma/client";
 import { updateBookingStatus, updateBookingAdminNotes, updateBookingPrice } from "../../actions";
+import { logger } from "@/lib/logger";
 
 type Booking = {
   id: string;
@@ -57,7 +58,7 @@ export default function BookingActions({ booking }: { booking: Booking }) {
       await updateBookingAdminNotes(booking.id, notes);
     } catch (error) {
       // Error is caught but doesn't prevent finally from executing
-      console.error("Failed to save notes:", error);
+      logger.error("booking-actions", "Failed to save notes", error);
     } finally {
       // Guaranteed to execute even if error occurs
       setSaving(false);
@@ -84,7 +85,7 @@ export default function BookingActions({ booking }: { booking: Booking }) {
       setPriceError(null);
     } catch (error) {
       setPriceError(error instanceof Error ? error.message : "Failed to save price");
-      console.error("Failed to save price:", error);
+      logger.error("booking-actions", "Failed to save price", error);
     } finally {
       setSavingPrice(false);
     }
