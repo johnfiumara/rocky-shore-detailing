@@ -8,14 +8,20 @@ const sb = createClient(
   { auth: { autoRefreshToken: false, persistSession: false } },
 );
 
-const { data: users, error: uErr } = await sb.auth.admin.listUsers();
-if (uErr) throw uErr;
-const { data: roles, error: rErr } = await sb.from("user_role").select("user_id, role");
-if (rErr) throw rErr;
+async function main() {
+  const { data: users, error: uErr } = await sb.auth.admin.listUsers();
+  if (uErr) throw uErr;
+  const { data: roles, error: rErr } = await sb.from("user_role").select("user_id, role");
+  if (rErr) throw rErr;
 
-const byId = Object.fromEntries((roles ?? []).map((x) => [x.user_id, x.role]));
-for (const u of users.users) {
-  console.log(
-    `${u.email ?? "(no email)"}  ·  role=${byId[u.id] ?? "none"}  ·  confirmed=${!!u.email_confirmed_at}`,
-  );
+  const byId = Object.fromEntries((roles ?? []).map((x) => [x.user_id, x.role]));
+  for (const u of users.users) {
+    console.log(
+      `${u.email ?? "(no email)"}  ·  role=${byId[u.id] ?? "none"}  ·  confirmed=${!!u.email_confirmed_at}`,
+    );
+  }
 }
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
