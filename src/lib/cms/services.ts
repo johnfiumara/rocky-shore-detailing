@@ -17,9 +17,19 @@ export async function getServices(): Promise<CmsService[]> {
       .eq("active", true)
       .order("sortOrder");
 
-    if (error || !data || data.length === 0) return staticServices;
+    if (error || !data || data.length === 0) {
+      console.warn("[cms:services] No services found, using static fallback", {
+        error: error?.message,
+        timestamp: new Date().toISOString(),
+      });
+      return staticServices;
+    }
     return data as CmsService[];
-  } catch {
+  } catch (err) {
+    console.error("[cms:services] Failed to fetch services", {
+      error: err instanceof Error ? err.message : String(err),
+      timestamp: new Date().toISOString(),
+    });
     return staticServices;
   }
 }

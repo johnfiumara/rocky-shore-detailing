@@ -8,6 +8,8 @@ import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase/server";
 import { SERVICE_SLUGS, TIME_WINDOWS } from "@/lib/booking-schema";
+import { logger } from "@/lib/logger";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 const loginSchema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -88,6 +90,7 @@ const manualBookingSchema = z.object({
 });
 
 export async function createManualBooking(_: unknown, formData: FormData) {
+  // CSRF-protected via Next.js Server Actions + SameSite cookies
   await requireRole("admin");
   const raw = Object.fromEntries(
     Array.from(formData.entries()).filter(([, v]) => typeof v === "string"),
@@ -162,12 +165,13 @@ export async function createManualBooking(_: unknown, formData: FormData) {
     redirect(`/admin/bookings/${booking.id}`);
   } catch (err) {
     if (err && typeof err === "object" && "digest" in err) throw err; // re-throw redirect
-    console.error("[manual booking] failed", err);
+    logger.error("manual-booking", "Failed to create booking", err);
     return { error: "Could not save booking. Try again." };
   }
 }
 
 export async function updateBookingStatus(id: string, status: BookingStatus) {
+  // CSRF-protected via Next.js Server Actions + SameSite cookies
   await requireRole("admin");
   await prisma.booking.update({ where: { id }, data: { status } });
   revalidatePath("/admin/bookings");
@@ -175,12 +179,14 @@ export async function updateBookingStatus(id: string, status: BookingStatus) {
 }
 
 export async function updateBookingAdminNotes(id: string, adminNotes: string) {
+  // CSRF-protected via Next.js Server Actions + SameSite cookies
   await requireRole("admin");
   await prisma.booking.update({ where: { id }, data: { adminNotes } });
   revalidatePath("/admin/bookings/" + id);
 }
 
 export async function updateBookingPrice(id: string, price: number) {
+  // CSRF-protected via Next.js Server Actions + SameSite cookies
   await requireRole("admin");
   await prisma.booking.update({ where: { id }, data: { price } });
   revalidatePath("/admin/bookings/" + id);
@@ -208,7 +214,11 @@ export async function toggleServiceActive(serviceId: string, active: boolean) {
 
 export async function updateServiceDescription(serviceId: string, description: string) {
   await requireRole("admin", "editor");
-  await prisma.service.update({ where: { id: serviceId }, data: { description } });
+  // Sanitize user input to prevent XSS
+  await prisma.service.update({
+    where: { id: serviceId },
+    data: { description: sanitizeHtml(description) },
+  });
   revalidatePath("/");
   revalidatePath("/admin/content");
 }
@@ -223,18 +233,27 @@ export async function reorderServices(updates: { id: string; sortOrder: number }
 }
 
 export async function createTestimonial(_: unknown, formData: FormData) {
+  // CSRF-protected via Next.js Server Actions + SameSite cookies
   await requireRole("admin", "editor");
   const quote = formData.get("quote") as string;
   const name = formData.get("name") as string;
   const context = formData.get("context") as string;
   if (!quote || !name || !context) return { error: "All fields are required" };
-  await prisma.testimonial.create({ data: { quote, name, context } });
+  // Sanitize user input to prevent XSS
+  await prisma.testimonial.create({
+    data: {
+      quote: sanitizeHtml(quote),
+      name: sanitizeHtml(name),
+      context: sanitizeHtml(context),
+    },
+  });
   revalidatePath("/");
   revalidatePath("/admin/content");
   return { ok: true };
 }
 
 export async function deleteTestimonial(id: string) {
+  // CSRF-protected via Next.js Server Actions + SameSite cookies
   await requireRole("admin", "editor");
   await prisma.testimonial.delete({ where: { id } });
   revalidatePath("/");
@@ -250,7 +269,13 @@ export async function toggleTestimonialPublished(id: string, published: boolean)
 
 export async function updateTestimonial(id: string, data: { quote?: string; name?: string; context?: string }) {
   await requireRole("admin", "editor");
-  await prisma.testimonial.update({ where: { id }, data });
+  // Sanitize user input to prevent XSS
+  const sanitizedData = {
+    quote: data.quote ? sanitizeHtml(data.quote) : undefined,
+    name: data.name ? sanitizeHtml(data.name) : undefined,
+    context: data.context ? sanitizeHtml(data.context) : undefined,
+  };
+  await prisma.testimonial.update({ where: { id }, data: sanitizedData });
   revalidatePath("/");
   revalidatePath("/admin/content");
 }
@@ -265,11 +290,18 @@ export async function reorderTestimonials(updates: { id: string; sortOrder: numb
 }
 
 export async function createFaqItem(_: unknown, formData: FormData) {
+  // CSRF-protected via Next.js Server Actions + SameSite cookies
   await requireRole("admin", "editor");
   const question = formData.get("question") as string;
   const answer = formData.get("answer") as string;
   if (!question || !answer) return { error: "All fields are required" };
-  await prisma.faqItem.create({ data: { question, answer } });
+  // Sanitize user input to prevent XSS
+  await prisma.faqItem.create({
+    data: {
+      question: sanitizeHtml(question),
+      answer: sanitizeHtml(answer),
+    },
+  });
   revalidatePath("/");
   revalidatePath("/admin/content");
   return { ok: true };
@@ -291,7 +323,12 @@ export async function toggleFaqItemPublished(id: string, published: boolean) {
 
 export async function updateFaqItem(id: string, data: { question?: string; answer?: string }) {
   await requireRole("admin", "editor");
-  await prisma.faqItem.update({ where: { id }, data });
+  // Sanitize user input to prevent XSS
+  const sanitizedData = {
+    question: data.question ? sanitizeHtml(data.question) : undefined,
+    answer: data.answer ? sanitizeHtml(data.answer) : undefined,
+  };
+  await prisma.faqItem.update({ where: { id }, data: sanitizedData });
   revalidatePath("/");
   revalidatePath("/admin/content");
 }
@@ -307,7 +344,14 @@ export async function reorderFaqItems(updates: { id: string; sortOrder: number }
 
 export async function updateGalleryImage(id: string, data: { alt?: string; label?: string; isBefore?: boolean; isAfter?: boolean }) {
   await requireRole("admin", "editor");
-  await prisma.galleryImage.update({ where: { id }, data });
+  // Sanitize user input to prevent XSS
+  const sanitizedData = {
+    alt: data.alt ? sanitizeHtml(data.alt) : undefined,
+    label: data.label ? sanitizeHtml(data.label) : undefined,
+    isBefore: data.isBefore,
+    isAfter: data.isAfter,
+  };
+  await prisma.galleryImage.update({ where: { id }, data: sanitizedData });
   revalidatePath("/");
   revalidatePath("/admin/gallery");
 }
@@ -345,6 +389,7 @@ const expenseSchema = z.object({
 });
 
 export async function createExpense(_: unknown, formData: FormData) {
+  // CSRF-protected via Next.js Server Actions + SameSite cookies
   await requireRole("admin", "editor");
   const parsed = expenseSchema.safeParse({
     date: formData.get("date"),
@@ -382,6 +427,7 @@ export async function createExpense(_: unknown, formData: FormData) {
 }
 
 export async function deleteExpense(id: string) {
+  // CSRF-protected via Next.js Server Actions + SameSite cookies
   await requireRole("admin");
   await prisma.expense.delete({ where: { id } });
   revalidatePath("/admin/expenses");
@@ -401,6 +447,7 @@ const messageSchema = z.object({
 });
 
 export async function createCustomerMessage(_: unknown, formData: FormData) {
+  // CSRF-protected via Next.js Server Actions + SameSite cookies
   await requireRole("admin", "editor");
   const parsed = messageSchema.safeParse({
     customerId: formData.get("customerId"),

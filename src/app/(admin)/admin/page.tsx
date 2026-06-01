@@ -7,6 +7,23 @@ import { formatDate } from "@/lib/format";
 export const metadata = { title: "Dashboard" };
 
 export default async function AdminDashboard() {
+  // TEMPORARY DEBUG: catch & display the real error inline so we can see
+  // it in the browser without function logs. Revert this wrapper once the
+  // deploy bug is identified.
+  try {
+    return await renderDashboard();
+  } catch (err) {
+    if (err && typeof err === "object" && "digest" in err) throw err; // re-throw next redirect/notFound
+    const e = err as Error;
+    return (
+      <pre style={{ padding: 24, color: "#fca5a5", fontFamily: "monospace", whiteSpace: "pre-wrap" }}>
+        {`name:    ${e?.name}\nmessage: ${e?.message}\nstack:\n${e?.stack}`}
+      </pre>
+    );
+  }
+}
+
+async function renderDashboard() {
   await requireRole("admin", "editor");
 
   const [pendingCount, confirmedCount, customerCount, recentBookings] = await Promise.all([

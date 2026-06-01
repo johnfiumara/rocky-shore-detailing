@@ -16,13 +16,23 @@ export async function getProcessSteps(): Promise<CmsProcessStep[]> {
       .eq("published", true)
       .order("sortOrder");
 
-    if (error || !data || data.length === 0) return staticSteps;
+    if (error || !data || data.length === 0) {
+      console.warn("[cms:process-steps] No process steps found, using static fallback", {
+        error: error?.message,
+        timestamp: new Date().toISOString(),
+      });
+      return staticSteps;
+    }
     return data.map((r: { title: string; body: string }, i: number) => ({
       number: String(i + 1).padStart(2, "0"),
       title: r.title,
       body: r.body,
     }));
-  } catch {
+  } catch (err) {
+    console.error("[cms:process-steps] Failed to fetch process steps", {
+      error: err instanceof Error ? err.message : String(err),
+      timestamp: new Date().toISOString(),
+    });
     return staticSteps;
   }
 }
