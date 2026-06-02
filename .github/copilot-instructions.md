@@ -31,9 +31,11 @@ npm run db:studio     # Open Prisma Studio (browser UI)
 | Variable | Required | Default | Notes |
 |---|---|---|---|
 | `DATABASE_URL` | ✓ | — | Postgres connection string. Use pooled in production. |
-| `ADMIN_JWT_SECRET` | ✓ | — | Signs admin session cookies. Generate: `openssl rand -base64 48` |
-| `ADMIN_PASSWORD_HASH` | ✓ | — | bcrypt hash of admin password. Generate: `node -e "console.log(require('bcryptjs').hashSync('your-password',12))"` |
+| `NEXT_PUBLIC_SUPABASE_URL` | ✓ | — | Supabase project URL (also used by Supabase Auth). |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✓ | — | Supabase anon key. Public by design; RLS gates access. |
+| `SUPABASE_SERVICE_ROLE_KEY` | ✓ | — | Server-only Supabase service-role key. Used for admin invite and storage signing. |
 | `RESEND_API_KEY` | ✓ | — | Email API key from https://resend.com |
+| `NEXT_PUBLIC_SITE_URL` | — | `http://localhost:3000` | Base URL embedded in admin user-invite emails. |
 | `BOOKING_TO_EMAIL` | — | `fumarajohn8@gmail.com` | Where booking submissions land |
 | `BOOKING_FROM_EMAIL` | — | `Rocky Shore Bookings <onboarding@resend.dev>` | Sender email (use verified domain in production) |
 
@@ -120,15 +122,16 @@ Edit footer contact (phone, email, IG, hours) in `src/components/footer.tsx`.
 
 Host-agnostic (Vercel, Netlify, or any Node.js runtime):
 
-1. **Provision Postgres** (Neon, Supabase, RDS)
-2. **Set env vars** (DATABASE_URL, ADMIN_JWT_SECRET, ADMIN_PASSWORD_HASH, RESEND_API_KEY)
+1. **Provision Postgres + Supabase project** (Supabase covers both)
+2. **Set env vars** (`DATABASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`)
 3. **Push schema** (`npm run db:deploy` before first deploy)
-4. **Deploy** (`npm run build` is the build command; builds include Prisma codegen)
+4. **Provision the first admin user** (`npm run provision:admin`)
+5. **Deploy** (`npm run build` is the build command; builds include Prisma codegen)
 
 ## Troubleshooting
 
 - **Prisma client stale:** Run `npm run db:generate` or `npm run db:push` to regenerate `@prisma/client`
-- **Build fails:** Ensure `ADMIN_JWT_SECRET` and `ADMIN_PASSWORD_HASH` are set (admin area requires them even if unused)
+- **`/admin` returns 500:** Most often a missing or wrong env var. Check `DATABASE_URL` resolves to a reachable pooled Postgres, and the three Supabase vars are set. Check Netlify function logs for the digest shown in `admin/error.tsx`.
 - **Emails not sending:** Check `RESEND_API_KEY` is valid and the from domain is verified in Resend dashboard
 - **Image optimization errors:** Ensure `sharp` is installed; some hosting platforms require `npm ci` instead of `npm install`
 
