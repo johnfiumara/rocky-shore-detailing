@@ -33,8 +33,18 @@ function createClient() {
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
-export const prisma = globalForPrisma.prisma ?? createClient();
-
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
-}
+// Use a Proxy to lazily initialize the Prisma client only when it is actually accessed.
+// This prevents build-time failures when DATABASE_URL is not set but code is being compiled or statically analyzed.
+export const prisma = new Proxy<PrismaClient>({} as PrismaClient, {
+  get(target, prop, receiver) {
+    if (!globalForPrisma.prisma) {
+      globalForPrisma.prisma = createClient();
+    }
+    // Retrieve property from the real client, using the real client as receiver to avoid Proxy-related 'this' binding issues.
+    const value = Reflect.get(globalForPrisma.prisma, prop, globalForPrisma.prisma);
+    if (typeof value === "function") {
+      return value.bind(globalForPrisma.prisma);
+    }
+    return value;
+  },
+});
