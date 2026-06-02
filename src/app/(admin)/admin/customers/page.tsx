@@ -2,19 +2,33 @@ import { requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { formatDate } from "@/lib/format";
+import { Pagination, parsePageParams } from "../_components/pagination";
 
 export const metadata = { title: "Customers" };
 
-export default async function CustomersPage() {
-  await requireRole("admin");
+type SearchParams = { page?: string; pageSize?: string };
 
-  const customers = await prisma.customer.findMany({
-    orderBy: { createdAt: "desc" },
-    include: {
-      _count: { select: { bookings: true } },
-      bookings: { orderBy: { date: "desc" }, take: 1 },
-    },
-  });
+export default async function CustomersPage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  await requireRole("admin");
+  const params = await searchParams;
+  const { page, pageSize, skip, take } = parsePageParams(params);
+
+  const [customers, total] = await Promise.all([
+    prisma.customer.findMany({
+      orderBy: { createdAt: "desc" },
+      include: {
+        _count: { select: { bookings: true } },
+        bookings: { orderBy: { date: "desc" }, take: 1 },
+      },
+      skip,
+      take,
+    }),
+    prisma.customer.count(),
+  ]);
 
   return (
     <div className="p-6 md:p-8 pt-20 md:pt-8 max-w-5xl mx-auto space-y-6">
@@ -53,6 +67,8 @@ export default async function CustomersPage() {
           </table>
         )}
       </div>
+
+      <Pagination basePath="/admin/customers" page={page} pageSize={pageSize} total={total} />
     </div>
   );
 }

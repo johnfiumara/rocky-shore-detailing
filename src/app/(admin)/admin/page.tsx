@@ -1,32 +1,18 @@
 import { requireRole } from "@/lib/auth";
+import { supabaseServer } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { BookingStatus } from "@prisma/client";
 import Link from "next/link";
 import { formatDate } from "@/lib/format";
+import { StatusBadge } from "./_components/status-badge";
 
 export const metadata = { title: "Dashboard" };
 
 export default async function AdminDashboard() {
-  // TEMPORARY DEBUG: catch & display the real error inline so we can see
-  // it in the browser without function logs. Revert this wrapper once the
-  // deploy bug is identified.
-  try {
-    return await renderDashboard();
-  } catch (err) {
-    if (err && typeof err === "object" && "digest" in err) throw err; // re-throw next redirect/notFound
-    const e = err as Error;
-    return (
-      <pre style={{ padding: 24, color: "#fca5a5", fontFamily: "monospace", whiteSpace: "pre-wrap" }}>
-        {`name:    ${e?.name}\nmessage: ${e?.message}\nstack:\n${e?.stack}`}
-      </pre>
-    );
-  }
-}
-
-async function renderDashboard() {
   await requireRole("admin", "editor");
 
-  const [pendingCount, confirmedCount, customerCount, recentBookings] = await Promise.all([
+  const [supabase, pendingCount, confirmedCount, customerCount, recentBookings] = await Promise.all([
+    supabaseServer(),
     prisma.booking.count({ where: { status: BookingStatus.PENDING } }),
     prisma.booking.count({ where: { status: BookingStatus.CONFIRMED } }),
     prisma.customer.count(),
@@ -36,6 +22,9 @@ async function renderDashboard() {
       include: { customer: true, vehicle: true },
     }),
   ]);
+
+  const { data: userData } = await supabase.auth.getUser();
+  const greetingName = userData.user?.email?.split("@")[0] ?? "there";
 
   const stats = [
     { label: "Pending", value: pendingCount, href: "/admin/bookings?status=PENDING", accent: "text-amber-400" },
@@ -47,7 +36,7 @@ async function renderDashboard() {
     <div className="p-6 md:p-8 pt-20 md:pt-8 max-w-5xl mx-auto space-y-10">
       <div>
         <h1 className="text-2xl font-display text-bone">Dashboard</h1>
-        <p className="text-bone-dim text-sm mt-1">Welcome back, Aiden.</p>
+        <p className="text-bone-dim text-sm mt-1">Welcome back, {greetingName}.</p>
       </div>
 
       <div className="grid grid-cols-3 gap-4">
@@ -104,21 +93,5 @@ async function renderDashboard() {
         </div>
       </div>
     </div>
-  );
-}
-
-function StatusBadge({ status }: { status: BookingStatus }) {
-  const map: Record<BookingStatus, { label: string; className: string }> = {
-    PENDING: { label: "Pending", className: "bg-amber-400/10 text-amber-400" },
-    CONFIRMED: { label: "Confirmed", className: "bg-emerald-400/10 text-emerald-400" },
-    IN_PROGRESS: { label: "In Progress", className: "bg-blue-400/10 text-blue-400" },
-    COMPLETED: { label: "Completed", className: "bg-bone/10 text-bone-dim" },
-    CANCELLED: { label: "Cancelled", className: "bg-red-400/10 text-red-400" },
-  };
-  const { label, className } = map[status];
-  return (
-    <span className={`inline-block px-2 py-0.5 rounded-full text-xs ${className}`}>
-      {label}
-    </span>
   );
 }

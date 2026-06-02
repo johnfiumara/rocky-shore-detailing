@@ -59,7 +59,10 @@ export async function changePassword(_: unknown, formData: FormData) {
   }
   const supabase = await supabaseServer();
   const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
-  if (error) return { error: error.message };
+  if (error) {
+    logger.error("change-password", "Supabase rejected password update", error);
+    return { error: "Could not update password. Try again." };
+  }
   return { ok: true };
 }
 
