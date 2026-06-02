@@ -49,20 +49,31 @@ import { POST } from "@/app/api/booking/route";
 import { sendBookingEmail } from "@/lib/send-booking-email";
 import { logger } from "@/lib/logger";
 
-function createMockRequest(body: Record<string, any>, ip: string = "192.168.1.1") {
+let ipCounter = 1;
+function createMockRequest(body: Record<string, any>, ip?: string) {
+  const finalIp = ip || `192.168.2.${ipCounter++}`;
   const formData = new FormData();
+  
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowStr = tomorrow.toISOString().split("T")[0];
+
   Object.entries(body).forEach(([key, value]) => {
-    if (typeof value === "string") {
-      formData.append(key, value);
-    } else if (value instanceof File) {
-      formData.append(key, value);
+    let val = value;
+    if (key === "date" && value === "2024-12-25") {
+      val = tomorrowStr;
+    }
+    if (typeof val === "string") {
+      formData.append(key, val);
+    } else if (val instanceof File) {
+      formData.append(key, val);
     }
   });
 
   return {
     formData: async () => formData,
     headers: new Map([
-      ["x-forwarded-for", ip],
+      ["x-forwarded-for", finalIp],
     ]),
   } as unknown as Request;
 }
