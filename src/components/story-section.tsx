@@ -21,7 +21,7 @@ export default function StorySection() {
         <div className="md:col-span-6 md:col-start-7 self-end space-y-6 text-bone-dim leading-relaxed text-lg">
           <Reveal delay={0.1}>
             <p>
-              Rocky Shore started in a single garage in Portland, the kind of operation where a 2-stage polish meant
+              Rocky Coast started in a single garage in Portland, the kind of operation where a 2-stage polish meant
               missing dinner. Today it&apos;s a fully-equipped mobile studio that shows up at your driveway with water,
               power, and product — so you never give up your day to a shop.
             </p>

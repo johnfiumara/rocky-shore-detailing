@@ -21,6 +21,16 @@
             "type": "command",
             "command": "node .claude/hooks/typecheck-on-edit.mjs",
             "timeout": 90
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/lint-on-edit.mjs",
+            "timeout": 60
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/test-on-edit.mjs",
+            "timeout": 75
           }
         ]
       }

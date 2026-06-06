@@ -10,8 +10,8 @@ const supabase = createClient(
 async function main() {
   const settings = [
     { key: "contact.phone", value: "(207) 555-0100" },
-    { key: "contact.email", value: "hello@rockyshoredetailing.com" },
-    { key: "contact.instagram", value: "@rockyshore" },
+    { key: "contact.email", value: "hello@rockycoastdetailing.net" },
+    { key: "contact.instagram", value: "@rockycoast" },
     {
       key: "contact.hours",
       value: {

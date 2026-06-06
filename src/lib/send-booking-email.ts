@@ -40,7 +40,7 @@ function buildHtml(d: BookingInput, fileCount: number): string {
   return `<!doctype html>
 <html><body style="margin:0;padding:0;background:#0a0b0d;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif;">
   <div style="max-width:640px;margin:0 auto;padding:40px 28px;color:#f4efe6;">
-    <p style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#c9a36b;margin:0 0 8px;">Rocky Shore Detailing</p>
+    <p style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#c9a36b;margin:0 0 8px;">Rocky Coast Detailing</p>
     <h1 style="font-family:Georgia,serif;font-weight:400;font-size:28px;line-height:1.1;margin:0 0 24px;">New booking request</h1>
     <table style="width:100%;border-collapse:collapse;border-top:1px solid rgba(244,239,230,0.12);border-bottom:1px solid rgba(244,239,230,0.12);">
       ${row("Service", SERVICE_LABELS[d.service])}
@@ -65,7 +65,7 @@ export async function sendBookingEmail({ data, files }: SendInput): Promise<void
     throw new Error("RESEND_API_KEY is not set");
   }
   const to = process.env.BOOKING_TO_EMAIL ?? "fumarajohn8@gmail.com";
-  const from = process.env.BOOKING_FROM_EMAIL ?? "Rocky Shore Bookings <onboarding@resend.dev>";
+  const from = process.env.BOOKING_FROM_EMAIL ?? "Rocky Coast Bookings <onboarding@resend.dev>";
 
   const resend = new Resend(apiKey);
   const attachments = await Promise.all(

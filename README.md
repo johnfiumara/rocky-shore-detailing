@@ -1,6 +1,6 @@
-# Rocky Shore Detailing
+# Rocky Coast Detailing
 
-Cinematic single-page site for **Rocky Shore Detailing** — a Maine-statewide mobile auto-detailing studio run by Aiden Quinn.
+Cinematic single-page site for **Rocky Coast Detailing** — a Maine-statewide mobile auto-detailing studio run by Aiden Quinn.
 
 ## Quick start
 
@@ -24,7 +24,7 @@ Site runs at `http://localhost:3000`.
 | `RESEND_API_KEY` | yes | — | Get one free at https://resend.com (3,000 emails/mo). Without this, booking submissions return 502. |
 | `NEXT_PUBLIC_SITE_URL` | no | `http://localhost:3000` | Base URL used in admin user-invite email links. Set to your production hostname in prod. |
 | `BOOKING_TO_EMAIL` | no | `fumarajohn8@gmail.com` | Where bookings land. |
-| `BOOKING_FROM_EMAIL` | no | `Rocky Shore Bookings <onboarding@resend.dev>` | Resend's testing sender until you verify a custom domain at https://resend.com/domains. |
+| `BOOKING_FROM_EMAIL` | no | `Rocky Coast Bookings <onboarding@resend.dev>` | Resend's testing sender until you verify a custom domain at https://resend.com/domains. |
 
 ## Editing content (no code knowledge needed)
 

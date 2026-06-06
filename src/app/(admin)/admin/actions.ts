@@ -345,6 +345,55 @@ export async function reorderFaqItems(updates: { id: string; sortOrder: number }
   revalidatePath("/admin/content");
 }
 
+const createGalleryImageSchema = z.object({
+  src: z.string().trim().url("Pick an image first").max(500),
+  alt: z.string().trim().min(1, "Alt text is required").max(160),
+  label: z.string().trim().max(80).optional().default(""),
+  // Optional FK to media_asset. The MediaPicker is the only place we can
+  // populate this — once a row is created without it, backfilling means
+  // string-matching src URLs to media_asset paths.
+  mediaAssetId: z.string().trim().min(1).max(64).optional(),
+});
+
+export async function createGalleryImage(_: unknown, formData: FormData) {
+  // CSRF-protected via Next.js Server Actions + SameSite cookies
+  await requireRole("admin", "editor");
+  const parsed = createGalleryImageSchema.safeParse({
+    src: formData.get("src"),
+    alt: formData.get("alt"),
+    label: formData.get("label"),
+    mediaAssetId: formData.get("mediaAssetId") || undefined,
+  });
+  if (!parsed.success) {
+    const f = parsed.error.flatten().fieldErrors;
+    return {
+      error: f.src?.[0] ?? f.alt?.[0] ?? f.label?.[0] ?? "Please fill in the required fields.",
+    };
+  }
+  const d = parsed.data;
+  try {
+    await prisma.galleryImage.create({
+      data: {
+        // src is a URL — sanitize-html would mangle the query string. Zod's
+        // .url() check is the validation; the value is rendered into Next/Image
+        // src, not into innerHTML.
+        src: d.src,
+        alt: sanitizeHtml(d.alt),
+        label: d.label ? sanitizeHtml(d.label) : null,
+        mediaAssetId: d.mediaAssetId,
+        published: true,
+      },
+    });
+  } catch (err) {
+    if (err && typeof err === "object" && "digest" in err) throw err;
+    logger.error("create-gallery-image", "Failed to create gallery image", err);
+    return { error: "Could not add image. Try again." };
+  }
+  revalidatePath("/");
+  revalidatePath("/admin/gallery");
+  return { ok: true };
+}
+
 export async function updateGalleryImage(id: string, data: { alt?: string; label?: string; isBefore?: boolean; isAfter?: boolean }) {
   await requireRole("admin", "editor");
   // Sanitize user input to prevent XSS

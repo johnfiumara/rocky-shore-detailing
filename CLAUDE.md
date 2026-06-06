@@ -1,4 +1,4 @@
-# Rocky Shore Detailing — Claude context
+# Rocky Coast Detailing — Claude context
 
 Cinematic single-page marketing site (`/`) plus a server-rendered admin CMS (`/admin/*`) for a Maine mobile auto-detailing studio. Bookings, customers, services, FAQ, testimonials, gallery, expenses are all editable through the admin.
 
@@ -12,7 +12,7 @@ Cinematic single-page marketing site (`/`) plus a server-rendered admin CMS (`/a
 - **Email**: Resend (booking notifications, admin invites)
 - **Sanitization**: `sanitize-html` (NOT `isomorphic-dompurify` — that pulled jsdom and broke production)
 - **Testing**: Vitest (`npm run test:run`)
-- **Deploy**: Netlify with `@netlify/plugin-nextjs`. Production: `https://rockyshoredetail.netlify.app`. The `rockyshoredetailing.com` references in code don't resolve.
+- **Deploy**: Netlify with `@netlify/plugin-nextjs`. Production: `https://rockycoastdetailing.net`.
 
 ## Project layout
 
@@ -73,6 +73,15 @@ npm run db:deploy           # Apply schema changes in prod (no codegen)
 npm run db:seed             # Seed CMS content
 npm run provision:admin     # Create the first admin via Supabase admin SDK
 ```
+
+## Pending prod migrations
+
+These Supabase migrations exist in `supabase/migrations/` but must be applied manually to the prod project (SQL editor or `supabase db push`). The Netlify build does not apply them.
+
+- `0004_public_read_policies.sql` — anon SELECT policies for `Service` / `ServiceTier` / `Testimonial` / `FaqItem` / `GalleryImage`. Without this, the public site shows the static fallback from `src/data/*.ts` no matter what the CMS contains.
+- `0005_media_asset_columns.sql` — adds `mime` and `blur_data_url` columns to `media_asset` so `/api/media/finalize` inserts succeed and the new `/admin/media` upload button works.
+
+After applying, run `npm run verify:public` (hits the anon endpoint) to confirm reads work.
 
 ## Things that have bitten this codebase
 

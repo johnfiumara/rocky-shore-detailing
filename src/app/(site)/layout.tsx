@@ -31,10 +31,10 @@ const jetbrains = JetBrains_Mono({
 const localBusinessJsonLd = {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
-  "@id": "https://rockyshoredetailing.com",
-  "name": "Rocky Shore Detailing",
+  "@id": "https://rockycoastdetailing.net",
+  "name": "Rocky Coast Detailing",
   "description": "Hand-crafted mobile auto detailing services in Maine with paint correction, ceramic coatings, and interior restoration",
-  "url": "https://rockyshoredetailing.com",
+  "url": "https://rockycoastdetailing.net",
   "telephone": "+1-207-555-0100",
   "address": {
     "@type": "PostalAddress",
@@ -45,10 +45,10 @@ const localBusinessJsonLd = {
   "areaServed": "ME",
   "serviceType": "Automotive Detailing",
   "priceRange": "$$",
-  "image": "https://rockyshoredetailing.com/gallery/image-1.jpg",
+  "image": "https://rockycoastdetailing.net/gallery/image-1.jpg",
   "logo": {
     "@type": "ImageObject",
-    "url": "https://rockyshoredetailing.com/gallery/image-1.jpg"
+    "url": "https://rockycoastdetailing.net/gallery/image-1.jpg"
   }
 };
 
@@ -116,38 +116,38 @@ const servicesJsonLd = {
 
 export const metadata: Metadata = {
   title: {
-    default: "Rocky Shore Detailing — Mobile Auto Detailing across Maine",
-    template: "%s · Rocky Shore Detailing",
+    default: "Rocky Coast Detailing — Mobile Auto Detailing across Maine",
+    template: "%s · Rocky Coast Detailing",
   },
   description:
     "Hand-crafted mobile auto detailing by Aiden Quinn. Paint correction, ceramic coatings, interior restoration — at your driveway, statewide across Maine.",
-  metadataBase: new URL("https://rockyshoredetailing.com"),
+  metadataBase: new URL("https://rockycoastdetailing.net"),
   openGraph: {
-    title: "Rocky Shore Detailing",
+    title: "Rocky Coast Detailing",
     description: "Hand-crafted mobile auto detailing by Aiden Quinn. Statewide Maine.",
-    url: "https://rockyshoredetailing.com",
-    siteName: "Rocky Shore Detailing",
+    url: "https://rockycoastdetailing.net",
+    siteName: "Rocky Coast Detailing",
     type: "website",
     locale: "en_US",
     images: [
       {
-        url: "https://rockyshoredetailing.com/gallery/image-1.jpg",
+        url: "https://rockycoastdetailing.net/gallery/image-1.jpg",
         width: 1200,
         height: 630,
-        alt: "Rocky Shore Detailing - Premium Auto Detailing in Maine",
+        alt: "Rocky Coast Detailing - Premium Auto Detailing in Maine",
         type: "image/jpeg"
       }
     ]
   },
   twitter: {
     card: "summary_large_image",
-    title: "Rocky Shore Detailing",
+    title: "Rocky Coast Detailing",
     description: "Hand-crafted mobile auto detailing by Aiden Quinn across Maine",
-    images: ["https://rockyshoredetailing.com/gallery/image-1.jpg"],
+    images: ["https://rockycoastdetailing.net/gallery/image-1.jpg"],
     creator: "@rockyshoredet"
   },
   alternates: {
-    canonical: "https://rockyshoredetailing.com"
+    canonical: "https://rockycoastdetailing.net"
   }
 };
 

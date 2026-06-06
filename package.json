@@ -21,7 +21,8 @@
     "cms:seed:process": "tsx scripts/seed-process-steps.ts",
     "cms:seed:gallery": "tsx scripts/seed-gallery.ts",
     "cms:seed": "npm run cms:seed:services && npm run cms:seed:testimonials && npm run cms:seed:faq && npm run cms:seed:process && npm run cms:seed:gallery && npm run cms:seed:settings",
-    "cms:seed:settings": "tsx scripts/seed-settings.ts"
+    "cms:seed:settings": "tsx scripts/seed-settings.ts",
+    "verify:public": "tsx scripts/verify-public-reads.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

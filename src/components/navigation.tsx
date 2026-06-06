@@ -40,7 +40,7 @@ export default function Navigation() {
         }`}
       >
         <a href="#top" className="flex items-baseline gap-2 font-display text-bone text-xl tracking-tight">
-          <span>Rocky Shore</span>
+          <span>Rocky Coast</span>
           <span className="text-bronze italic font-light">Detailing</span>
         </a>
         <nav className="hidden md:flex items-center gap-8">

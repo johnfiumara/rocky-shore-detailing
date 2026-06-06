@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin/
 Disallow: /api/
 
-Sitemap: https://rockyshoredetailing.com/sitemap.xml
+Sitemap: https://rockycoastdetailing.net/sitemap.xml

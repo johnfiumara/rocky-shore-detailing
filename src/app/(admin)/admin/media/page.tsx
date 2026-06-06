@@ -2,6 +2,7 @@ import { requireRole } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import Image from "next/image";
+import ImageUploader from "./_components/image-uploader";
 
 export const metadata = { title: "Media Library" };
 
@@ -46,9 +47,11 @@ export default async function MediaPage() {
         <p className="text-bone-dim text-sm">{assets?.length ?? 0} assets</p>
       </div>
 
+      <ImageUploader />
+
       {(!assets || assets.length === 0) && (
         <div className="border border-line rounded-xl p-12 text-center text-bone-dim text-sm">
-          No media assets yet. Use the Upload button below to add images.
+          No media assets yet. Upload your first image above.
         </div>
       )}
 

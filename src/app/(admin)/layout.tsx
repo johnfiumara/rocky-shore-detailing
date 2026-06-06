@@ -10,8 +10,8 @@ const instrument = Instrument_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: "Admin · Rocky Shore Detailing",
-    template: "%s · Rocky Shore Admin",
+    default: "Admin · Rocky Coast Detailing",
+    template: "%s · Rocky Coast Admin",
   },
   robots: { index: false, follow: false },
 };

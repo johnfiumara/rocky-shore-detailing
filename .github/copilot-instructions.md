@@ -1,4 +1,4 @@
-# Copilot Instructions for Rocky Shore Detailing
+# Copilot Instructions for Rocky Coast Detailing
 
 ## Build & Run
 
@@ -37,7 +37,7 @@ npm run db:studio     # Open Prisma Studio (browser UI)
 | `RESEND_API_KEY` | ✓ | — | Email API key from https://resend.com |
 | `NEXT_PUBLIC_SITE_URL` | — | `http://localhost:3000` | Base URL embedded in admin user-invite emails. |
 | `BOOKING_TO_EMAIL` | — | `fumarajohn8@gmail.com` | Where booking submissions land |
-| `BOOKING_FROM_EMAIL` | — | `Rocky Shore Bookings <onboarding@resend.dev>` | Sender email (use verified domain in production) |
+| `BOOKING_FROM_EMAIL` | — | `Rocky Coast Bookings <onboarding@resend.dev>` | Sender email (use verified domain in production) |
 
 ## Architecture
 

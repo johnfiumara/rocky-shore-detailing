@@ -6,8 +6,8 @@ export default async function Footer() {
   const settings = await getSettings();
 
   const phone = (settings["contact.phone"] as string) ?? "(207) 555-0100";
-  const email = (settings["contact.email"] as string) ?? "hello@rockyshoredetailing.com";
-  const instagram = (settings["contact.instagram"] as string) ?? "@rockyshore";
+  const email = (settings["contact.email"] as string) ?? "hello@rockycoastdetailing.net";
+  const instagram = (settings["contact.instagram"] as string) ?? "@rockycoast";
   const hours = (settings["contact.hours"] as Record<string, string>) ?? {
     weekday: "Mon – Fri · 8a – 6p",
     saturday: "Saturday · 9a – 4p",
@@ -66,7 +66,7 @@ export default async function Footer() {
 
         <div className="mt-24 pt-8 border-t border-line flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-bone-dim text-xs">
-            &copy; {year} Rocky Shore Detailing. All rights reserved.
+            &copy; {year} Rocky Coast Detailing. All rights reserved.
           </p>
           <p className="text-bone-dim text-xs">
             Maine · Mobile detailing statewide

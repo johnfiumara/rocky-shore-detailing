@@ -2,6 +2,7 @@ import { requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import GalleryCard from "./gallery-card";
 import GalleryReorder from "./gallery-reorder";
+import NewGalleryImageButton from "./new-gallery-image-button";
 
 export const metadata = { title: "Gallery" };
 
@@ -24,14 +25,17 @@ export default async function GalleryAdminPage() {
 
   return (
     <div className="p-6 md:p-8 pt-20 md:pt-8 max-w-5xl mx-auto space-y-10">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4">
         <h1 className="text-2xl font-display text-bone">Gallery</h1>
-        <p className="text-bone-dim text-sm">{images.length} images</p>
+        <div className="flex items-center gap-4">
+          <p className="text-bone-dim text-sm">{images.length} images</p>
+          <NewGalleryImageButton />
+        </div>
       </div>
 
       {images.length === 0 && (
         <div className="border border-line rounded-xl p-8 text-center text-bone-dim text-sm">
-          No gallery images in the database yet.
+          No gallery images in the database yet. Click <span className="text-bronze">Add gallery image</span> above to add the first one.
         </div>
       )}
 
