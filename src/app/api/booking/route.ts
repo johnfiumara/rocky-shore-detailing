@@ -5,6 +5,7 @@ import { bookingSchema, validateFiles } from "@/lib/booking-schema";
 import { sendBookingEmail } from "@/lib/send-booking-email";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
+import { supabaseServer } from "@/lib/supabase/server";
 
 // Simple in-memory rate limiter for fallback (not distributed)
 class MemoryStore {
@@ -104,6 +105,27 @@ export async function POST(request: Request) {
 
   const data = parsed.data;
 
+  // If a customer is signed in AND the form email matches their auth email,
+  // attach the new Customer row to their user id. Mismatched emails get
+  // treated as a guest booking — we don't want to silently rebind their
+  // account to a different email.
+  let linkUserId: string | undefined;
+  try {
+    const supabase = await supabaseServer();
+    const { data: userData } = await supabase.auth.getUser();
+    const user = userData?.user;
+    if (user?.email && user.email.toLowerCase() === data.email.toLowerCase()) {
+      const { data: roleRow } = await supabase
+        .from("user_role")
+        .select("role")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (!roleRow) linkUserId = user.id;
+    }
+  } catch (err) {
+    logger.error("booking", "session lookup failed", err);
+  }
+
   // Upsert customer → upsert vehicle → create booking
   let booking: any;
   try {
@@ -115,6 +137,7 @@ export async function POST(request: Request) {
         address: data.address,
         city: data.city,
         zip: data.zip,
+        ...(linkUserId ? { userId: linkUserId } : {}),
       },
       create: {
         name: data.name,
@@ -123,6 +146,7 @@ export async function POST(request: Request) {
         address: data.address,
         city: data.city,
         zip: data.zip,
+        userId: linkUserId,
       },
     });
 

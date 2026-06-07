@@ -37,6 +37,24 @@ Single page composed of anchor sections; all dynamic sections are CMS-driven thr
 - Booking confirmation email via Resend (`src/lib/send-booking-email.ts`)
 - Success screen (`src/components/booking-success.tsx`)
 
+### Customer accounts (`src/app/(account)/*`)
+
+- `/signup` — name + email + password; creates Supabase Auth user and pre-creates a `Customer` row (or links to an existing one with that email). Shows "check your inbox" after submit.
+- `/login` — email + password sign-in. Blocks staff accounts (`user_role` row) from using the customer side.
+- `/auth/callback` — Supabase email-confirmation handler; exchanges `?code=` for a session, then redirects to `/account`.
+- `/account` — dashboard: greeting, full booking history with status badges, vehicles list, and the customer iCal feed URL.
+- `/account/bookings/[id]` — booking detail with **Cancel** button. Customers can cancel `PENDING` or `CONFIRMED` bookings whose date is today or later. `IN_PROGRESS`, `COMPLETED`, `CANCELLED`, and past-dated bookings show a "can no longer be cancelled" message.
+- Sign out.
+- Schema link: `Customer.userId` (Supabase `auth.users.id`, unique, nullable). Stored as `String? @db.Uuid` — Prisma can't FK into the `auth` schema.
+- Auto-link rules: on `/signup` and on every server-side customer auth check, an unlinked `Customer` row with the matching email is bound to the user id. Mismatched / already-linked emails return null (no data leak).
+- Public booking flow (`POST /api/booking`): if the submitter is signed in **and** the form email matches their auth email **and** they are not staff, the `Customer` upsert sets `userId`. Guest bookings continue to work; on later signup with that email the existing bookings get claimed automatically.
+
+### Calendar feeds
+
+- `GET /api/admin/calendar.ics?token=$CALENDAR_FEED_TOKEN` — all non-cancelled bookings as an iCal feed for admin use. 503 when `CALENDAR_FEED_TOKEN` env is unset.
+- `GET /api/account/calendar.ics` — authenticated customer's own non-cancelled bookings; 401 when not signed in.
+- All-day events (booking dates are date-only). Window / vehicle / status go in the description.
+
 ### Admin panel (`src/app/(admin)/admin/*`)
 
 Auth: Supabase email/password, `user_role` table (`admin` | `editor`). `requireRole` guards every page and action.
@@ -68,9 +86,9 @@ All ~30 mutations follow: `"use server"` → `requireRole` → Zod parse → san
 
 ## Not working / not built / known issues
 
-### Customer accounts — not built
+### Migration not applied yet
 
-The deleted design spec described a customer-facing auth flow (signup, login, "my bookings"). **None of it ships.** No customer login page, no customer dashboard, no public auth UI. Bookings are guest-only and identified by email at submit time.
+This commit changes the schema (adds `Customer.user_id uuid`). Run `npm run db:deploy` (or `npx prisma db push`) against the prod Supabase project before deploying — until then, `Customer` queries will fail at runtime because Prisma expects the column.
 
 ### CMS silent-fallback pattern
 
@@ -82,15 +100,17 @@ Known signature: login succeeds (that goes through Supabase Auth) but every othe
 
 ### Repo hygiene gaps in current working tree
 
-- `.env.example` is deleted — no documented env contract for new contributors. Required vars (minimum): `DATABASE_URL`, `DIRECT_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `BOOKING_NOTIFICATION_EMAIL`, `NEXT_PUBLIC_SITE_URL`. Optional: `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`.
+- `.env.example` is deleted — no documented env contract for new contributors. Required vars (minimum): `DATABASE_URL`, `DIRECT_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `BOOKING_NOTIFICATION_EMAIL`, `NEXT_PUBLIC_SITE_URL`. Optional: `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `CALENDAR_FEED_TOKEN` (admin iCal).
 - No README at repo root.
 
 ### Not implemented anywhere
 
-- Public-facing customer booking management (cancel / reschedule)
-- Customer notifications beyond initial booking confirmation
-- SMS / multi-channel messaging (the `CustomerMessage` schema supports it; only the admin-side create UI exists)
-- Online payments / deposits (bookings store a `price`, but no checkout)
-- Calendar export / iCal
-- Admin role granularity beyond `admin` and `editor`
-- Audit log of admin actions
+- **Password reset** for customers (link out to Supabase's hosted recovery flow from `/login` — not wired up)
+- **Reschedule** (only cancel — customers cancel and rebook)
+- **Profile edit** (name / email / password change from `/account`)
+- **Customer email change** + re-confirmation flow
+- **Customer notifications** beyond the initial booking confirmation (no "your booking was confirmed", "cancelled by you", "reminder tomorrow")
+- **SMS / multi-channel messaging** (the `CustomerMessage` schema supports it; only the admin-side create UI exists). Requires Twilio account.
+- **Online payments / deposits** (bookings store a `price`, but no checkout). Requires Stripe account.
+- **Admin role granularity** beyond `admin` and `editor`
+- **Audit log** of admin actions

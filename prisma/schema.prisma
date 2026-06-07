@@ -10,6 +10,9 @@ model Customer {
   id        String            @id @default(cuid())
   name      String
   email     String            @unique
+  // Supabase auth.users.id (UUID). Set when a customer signs up.
+  // Stored as String because Prisma can't reference the auth schema.
+  userId    String?           @unique @map("user_id") @db.Uuid
   phone     String?
   address   String?
   city      String?
