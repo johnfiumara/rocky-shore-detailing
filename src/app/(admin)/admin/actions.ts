@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { BookingStatus } from "@prisma/client";
+import { BookingStatus, type Prisma } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
@@ -10,6 +10,55 @@ import { supabaseServer } from "@/lib/supabase/server";
 import { SERVICE_SLUGS, TIME_WINDOWS } from "@/lib/booking-schema";
 import { logger } from "@/lib/logger";
 import { sanitizeHtml } from "@/lib/sanitize";
+
+// ---------------------------------------------------------------------------
+// Shared helpers
+// ---------------------------------------------------------------------------
+
+type ReorderUpdate = { id: string; sortOrder: number };
+
+/** Revalidate several paths in a single call. */
+function revalidatePaths(...paths: string[]) {
+  for (const path of paths) revalidatePath(path);
+}
+
+/** Public site + content admin — the pages affected by every CMS content edit. */
+const revalidateContent = () => revalidatePaths("/", "/admin/content");
+/** Public site + gallery admin — the pages affected by every gallery edit. */
+const revalidateGallery = () => revalidatePaths("/", "/admin/gallery");
+
+/** Sanitize an optional rich-text field, leaving `undefined` untouched so it is omitted from a partial update. */
+const sanitizeOptional = (value?: string) => (value ? sanitizeHtml(value) : undefined);
+
+/** First populated Zod field error across `keys`, or `undefined` if none. */
+function firstError(error: z.ZodError, ...keys: string[]): string | undefined {
+  const fieldErrors = error.flatten().fieldErrors as Record<string, string[] | undefined>;
+  for (const key of keys) {
+    const message = fieldErrors[key]?.[0];
+    if (message) return message;
+  }
+  return undefined;
+}
+
+/** Re-throw Next.js control-flow signals (redirect/notFound carry a `digest`) so a catch block doesn't swallow them. */
+function rethrowControlFlow(err: unknown) {
+  if (err && typeof err === "object" && "digest" in err) throw err;
+}
+
+/** Shared body for the drag-reorder actions: persist every new sortOrder in one transaction, then revalidate. */
+async function reorder(
+  updates: ReorderUpdate[],
+  update: (u: ReorderUpdate) => Prisma.PrismaPromise<unknown>,
+  revalidate: () => void,
+) {
+  await requireRole("admin", "editor");
+  await prisma.$transaction(updates.map(update));
+  revalidate();
+}
+
+// ---------------------------------------------------------------------------
+// Auth
+// ---------------------------------------------------------------------------
 
 const loginSchema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -22,8 +71,7 @@ export async function login(_: unknown, formData: FormData) {
     password: formData.get("password"),
   });
   if (!parsed.success) {
-    const first = parsed.error.flatten().fieldErrors;
-    return { error: first.email?.[0] ?? first.password?.[0] ?? "Invalid form" };
+    return { error: firstError(parsed.error, "email", "password") ?? "Invalid form" };
   }
   const supabase = await supabaseServer();
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
@@ -54,8 +102,7 @@ export async function changePassword(_: unknown, formData: FormData) {
     confirm: formData.get("confirm"),
   });
   if (!parsed.success) {
-    const f = parsed.error.flatten().fieldErrors;
-    return { error: f.password?.[0] ?? f.confirm?.[0] ?? "Invalid input" };
+    return { error: firstError(parsed.error, "password", "confirm") ?? "Invalid input" };
   }
   const supabase = await supabaseServer();
   const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
@@ -65,6 +112,10 @@ export async function changePassword(_: unknown, formData: FormData) {
   }
   return { ok: true };
 }
+
+// ---------------------------------------------------------------------------
+// Bookings
+// ---------------------------------------------------------------------------
 
 const manualBookingSchema = z.object({
   service: z.enum(SERVICE_SLUGS, { message: "Select a service" }),
@@ -161,13 +212,10 @@ export async function createManualBooking(_: unknown, formData: FormData) {
       },
     });
 
-    revalidatePath("/admin");
-    revalidatePath("/admin/bookings");
-    revalidatePath("/admin/schedule");
-    revalidatePath("/admin/customers");
+    revalidatePaths("/admin", "/admin/bookings", "/admin/schedule", "/admin/customers");
     redirect(`/admin/bookings/${booking.id}`);
   } catch (err) {
-    if (err && typeof err === "object" && "digest" in err) throw err; // re-throw redirect
+    rethrowControlFlow(err); // re-throw redirect
     logger.error("manual-booking", "Failed to create booking", err);
     return { error: "Could not save booking. Try again." };
   }
@@ -177,42 +225,43 @@ export async function updateBookingStatus(id: string, status: BookingStatus) {
   // CSRF-protected via Next.js Server Actions + SameSite cookies
   await requireRole("admin");
   await prisma.booking.update({ where: { id }, data: { status } });
-  revalidatePath("/admin/bookings");
-  revalidatePath("/admin/bookings/" + id);
+  revalidatePaths("/admin/bookings", `/admin/bookings/${id}`);
 }
 
 export async function updateBookingAdminNotes(id: string, adminNotes: string) {
   // CSRF-protected via Next.js Server Actions + SameSite cookies
   await requireRole("admin");
   await prisma.booking.update({ where: { id }, data: { adminNotes } });
-  revalidatePath("/admin/bookings/" + id);
+  revalidatePath(`/admin/bookings/${id}`);
 }
 
 export async function updateBookingPrice(id: string, price: number) {
   // CSRF-protected via Next.js Server Actions + SameSite cookies
   await requireRole("admin");
   await prisma.booking.update({ where: { id }, data: { price } });
-  revalidatePath("/admin/bookings/" + id);
+  revalidatePath(`/admin/bookings/${id}`);
 }
 
 export async function updateCustomerNotes(id: string, notes: string) {
   await requireRole("admin");
   await prisma.customer.update({ where: { id }, data: { notes } });
-  revalidatePath("/admin/customers/" + id);
+  revalidatePath(`/admin/customers/${id}`);
 }
+
+// ---------------------------------------------------------------------------
+// Services
+// ---------------------------------------------------------------------------
 
 export async function updateServiceTierPrice(tierId: string, price: number) {
   await requireRole("admin", "editor");
   await prisma.serviceTier.update({ where: { id: tierId }, data: { price } });
-  revalidatePath("/");
-  revalidatePath("/admin/content");
+  revalidateContent();
 }
 
 export async function toggleServiceActive(serviceId: string, active: boolean) {
   await requireRole("admin", "editor");
   await prisma.service.update({ where: { id: serviceId }, data: { active } });
-  revalidatePath("/");
-  revalidatePath("/admin/content");
+  revalidateContent();
 }
 
 export async function updateServiceDescription(serviceId: string, description: string) {
@@ -222,18 +271,20 @@ export async function updateServiceDescription(serviceId: string, description: s
     where: { id: serviceId },
     data: { description: sanitizeHtml(description) },
   });
-  revalidatePath("/");
-  revalidatePath("/admin/content");
+  revalidateContent();
 }
 
-export async function reorderServices(updates: { id: string; sortOrder: number }[]) {
-  await requireRole("admin", "editor");
-  await prisma.$transaction(
-    updates.map((u) => prisma.service.update({ where: { id: u.id }, data: { sortOrder: u.sortOrder } }))
+export async function reorderServices(updates: ReorderUpdate[]) {
+  await reorder(
+    updates,
+    (u) => prisma.service.update({ where: { id: u.id }, data: { sortOrder: u.sortOrder } }),
+    revalidateContent,
   );
-  revalidatePath("/");
-  revalidatePath("/admin/content");
 }
+
+// ---------------------------------------------------------------------------
+// Testimonials
+// ---------------------------------------------------------------------------
 
 export async function createTestimonial(_: unknown, formData: FormData) {
   // CSRF-protected via Next.js Server Actions + SameSite cookies
@@ -250,8 +301,7 @@ export async function createTestimonial(_: unknown, formData: FormData) {
       context: sanitizeHtml(context),
     },
   });
-  revalidatePath("/");
-  revalidatePath("/admin/content");
+  revalidateContent();
   return { ok: true };
 }
 
@@ -259,38 +309,40 @@ export async function deleteTestimonial(id: string) {
   // CSRF-protected via Next.js Server Actions + SameSite cookies
   await requireRole("admin", "editor");
   await prisma.testimonial.delete({ where: { id } });
-  revalidatePath("/");
-  revalidatePath("/admin/content");
+  revalidateContent();
 }
 
 export async function toggleTestimonialPublished(id: string, published: boolean) {
   await requireRole("admin", "editor");
   await prisma.testimonial.update({ where: { id }, data: { published } });
-  revalidatePath("/");
-  revalidatePath("/admin/content");
+  revalidateContent();
 }
 
 export async function updateTestimonial(id: string, data: { quote?: string; name?: string; context?: string }) {
   await requireRole("admin", "editor");
   // Sanitize user input to prevent XSS
-  const sanitizedData = {
-    quote: data.quote ? sanitizeHtml(data.quote) : undefined,
-    name: data.name ? sanitizeHtml(data.name) : undefined,
-    context: data.context ? sanitizeHtml(data.context) : undefined,
-  };
-  await prisma.testimonial.update({ where: { id }, data: sanitizedData });
-  revalidatePath("/");
-  revalidatePath("/admin/content");
+  await prisma.testimonial.update({
+    where: { id },
+    data: {
+      quote: sanitizeOptional(data.quote),
+      name: sanitizeOptional(data.name),
+      context: sanitizeOptional(data.context),
+    },
+  });
+  revalidateContent();
 }
 
-export async function reorderTestimonials(updates: { id: string; sortOrder: number }[]) {
-  await requireRole("admin", "editor");
-  await prisma.$transaction(
-    updates.map((u) => prisma.testimonial.update({ where: { id: u.id }, data: { sortOrder: u.sortOrder } }))
+export async function reorderTestimonials(updates: ReorderUpdate[]) {
+  await reorder(
+    updates,
+    (u) => prisma.testimonial.update({ where: { id: u.id }, data: { sortOrder: u.sortOrder } }),
+    revalidateContent,
   );
-  revalidatePath("/");
-  revalidatePath("/admin/content");
 }
+
+// ---------------------------------------------------------------------------
+// FAQ
+// ---------------------------------------------------------------------------
 
 export async function createFaqItem(_: unknown, formData: FormData) {
   // CSRF-protected via Next.js Server Actions + SameSite cookies
@@ -305,45 +357,46 @@ export async function createFaqItem(_: unknown, formData: FormData) {
       answer: sanitizeHtml(answer),
     },
   });
-  revalidatePath("/");
-  revalidatePath("/admin/content");
+  revalidateContent();
   return { ok: true };
 }
 
 export async function deleteFaqItem(id: string) {
   await requireRole("admin", "editor");
   await prisma.faqItem.delete({ where: { id } });
-  revalidatePath("/");
-  revalidatePath("/admin/content");
+  revalidateContent();
 }
 
 export async function toggleFaqItemPublished(id: string, published: boolean) {
   await requireRole("admin", "editor");
   await prisma.faqItem.update({ where: { id }, data: { published } });
-  revalidatePath("/");
-  revalidatePath("/admin/content");
+  revalidateContent();
 }
 
 export async function updateFaqItem(id: string, data: { question?: string; answer?: string }) {
   await requireRole("admin", "editor");
   // Sanitize user input to prevent XSS
-  const sanitizedData = {
-    question: data.question ? sanitizeHtml(data.question) : undefined,
-    answer: data.answer ? sanitizeHtml(data.answer) : undefined,
-  };
-  await prisma.faqItem.update({ where: { id }, data: sanitizedData });
-  revalidatePath("/");
-  revalidatePath("/admin/content");
+  await prisma.faqItem.update({
+    where: { id },
+    data: {
+      question: sanitizeOptional(data.question),
+      answer: sanitizeOptional(data.answer),
+    },
+  });
+  revalidateContent();
 }
 
-export async function reorderFaqItems(updates: { id: string; sortOrder: number }[]) {
-  await requireRole("admin", "editor");
-  await prisma.$transaction(
-    updates.map((u) => prisma.faqItem.update({ where: { id: u.id }, data: { sortOrder: u.sortOrder } }))
+export async function reorderFaqItems(updates: ReorderUpdate[]) {
+  await reorder(
+    updates,
+    (u) => prisma.faqItem.update({ where: { id: u.id }, data: { sortOrder: u.sortOrder } }),
+    revalidateContent,
   );
-  revalidatePath("/");
-  revalidatePath("/admin/content");
 }
+
+// ---------------------------------------------------------------------------
+// Gallery
+// ---------------------------------------------------------------------------
 
 const createGalleryImageSchema = z.object({
   src: z.string().trim().url("Pick an image first").max(500),
@@ -365,9 +418,8 @@ export async function createGalleryImage(_: unknown, formData: FormData) {
     mediaAssetId: formData.get("mediaAssetId") || undefined,
   });
   if (!parsed.success) {
-    const f = parsed.error.flatten().fieldErrors;
     return {
-      error: f.src?.[0] ?? f.alt?.[0] ?? f.label?.[0] ?? "Please fill in the required fields.",
+      error: firstError(parsed.error, "src", "alt", "label") ?? "Please fill in the required fields.",
     };
   }
   const d = parsed.data;
@@ -385,43 +437,41 @@ export async function createGalleryImage(_: unknown, formData: FormData) {
       },
     });
   } catch (err) {
-    if (err && typeof err === "object" && "digest" in err) throw err;
+    rethrowControlFlow(err);
     logger.error("create-gallery-image", "Failed to create gallery image", err);
     return { error: "Could not add image. Try again." };
   }
-  revalidatePath("/");
-  revalidatePath("/admin/gallery");
+  revalidateGallery();
   return { ok: true };
 }
 
 export async function updateGalleryImage(id: string, data: { alt?: string; label?: string; isBefore?: boolean; isAfter?: boolean }) {
   await requireRole("admin", "editor");
   // Sanitize user input to prevent XSS
-  const sanitizedData = {
-    alt: data.alt ? sanitizeHtml(data.alt) : undefined,
-    label: data.label ? sanitizeHtml(data.label) : undefined,
-    isBefore: data.isBefore,
-    isAfter: data.isAfter,
-  };
-  await prisma.galleryImage.update({ where: { id }, data: sanitizedData });
-  revalidatePath("/");
-  revalidatePath("/admin/gallery");
+  await prisma.galleryImage.update({
+    where: { id },
+    data: {
+      alt: sanitizeOptional(data.alt),
+      label: sanitizeOptional(data.label),
+      isBefore: data.isBefore,
+      isAfter: data.isAfter,
+    },
+  });
+  revalidateGallery();
 }
 
 export async function toggleGalleryImagePublished(id: string, published: boolean) {
   await requireRole("admin", "editor");
   await prisma.galleryImage.update({ where: { id }, data: { published } });
-  revalidatePath("/");
-  revalidatePath("/admin/gallery");
+  revalidateGallery();
 }
 
-export async function reorderGalleryImages(updates: { id: string; sortOrder: number }[]) {
-  await requireRole("admin", "editor");
-  await prisma.$transaction(
-    updates.map((u) => prisma.galleryImage.update({ where: { id: u.id }, data: { sortOrder: u.sortOrder } }))
+export async function reorderGalleryImages(updates: ReorderUpdate[]) {
+  await reorder(
+    updates,
+    (u) => prisma.galleryImage.update({ where: { id: u.id }, data: { sortOrder: u.sortOrder } }),
+    revalidateGallery,
   );
-  revalidatePath("/");
-  revalidatePath("/admin/gallery");
 }
 
 // ---------------------------------------------------------------------------
@@ -452,13 +502,9 @@ export async function createExpense(_: unknown, formData: FormData) {
     notes: formData.get("notes"),
   });
   if (!parsed.success) {
-    const f = parsed.error.flatten().fieldErrors;
     return {
       error:
-        f.date?.[0] ??
-        f.category?.[0] ??
-        f.description?.[0] ??
-        f.amount?.[0] ??
+        firstError(parsed.error, "date", "category", "description", "amount") ??
         "Please fill in the required fields.",
     };
   }
@@ -473,8 +519,7 @@ export async function createExpense(_: unknown, formData: FormData) {
       notes: d.notes || null,
     },
   });
-  revalidatePath("/admin/expenses");
-  revalidatePath("/admin/budget");
+  revalidatePaths("/admin/expenses", "/admin/budget");
   return { ok: true };
 }
 
@@ -482,8 +527,7 @@ export async function deleteExpense(id: string) {
   // CSRF-protected via Next.js Server Actions + SameSite cookies
   await requireRole("admin");
   await prisma.expense.delete({ where: { id } });
-  revalidatePath("/admin/expenses");
-  revalidatePath("/admin/budget");
+  revalidatePaths("/admin/expenses", "/admin/budget");
 }
 
 // ---------------------------------------------------------------------------
@@ -509,8 +553,7 @@ export async function createCustomerMessage(_: unknown, formData: FormData) {
     body: formData.get("body"),
   });
   if (!parsed.success) {
-    const f = parsed.error.flatten().fieldErrors;
-    return { error: f.body?.[0] ?? f.channel?.[0] ?? f.direction?.[0] ?? "Invalid message" };
+    return { error: firstError(parsed.error, "body", "channel", "direction") ?? "Invalid message" };
   }
   const d = parsed.data;
   await prisma.customerMessage.create({
@@ -522,13 +565,12 @@ export async function createCustomerMessage(_: unknown, formData: FormData) {
       body: d.body,
     },
   });
-  revalidatePath("/admin/customers/" + d.customerId);
+  revalidatePath(`/admin/customers/${d.customerId}`);
   return { ok: true };
 }
 
 export async function deleteCustomerMessage(id: string, customerId: string) {
   await requireRole("admin", "editor");
   await prisma.customerMessage.delete({ where: { id } });
-  revalidatePath("/admin/customers/" + customerId);
+  revalidatePath(`/admin/customers/${customerId}`);
 }
-
