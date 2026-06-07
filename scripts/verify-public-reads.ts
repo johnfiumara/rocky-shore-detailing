@@ -190,7 +190,7 @@ async function main() {
   console.error(
     `[verify-public-reads] FAIL — ${failed.length}/${results.length} public reads broken.\n` +
       "  The live site will serve hardcoded fallback data from src/data/*.ts.\n" +
-      "  DO NOT DEPLOY until this is resolved. See .claude/skills/add-cms-table-rls/SKILL.md.",
+      "  DO NOT DEPLOY until this is resolved. Verify Supabase RLS policies grant SELECT to the anon role for every public CMS table.",
   );
   process.exit(1);
 }

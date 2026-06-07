@@ -37,9 +37,6 @@ yarn-error.log*
 # vercel
 .vercel
 
-# superpowers plugin runtime state
-/.superpowers/
-
 # typescript
 *.tsbuildinfo
 next-env.d.ts
