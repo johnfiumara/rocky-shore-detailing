@@ -1,1 +1,7 @@
-// Intentionally minimal. Per-test mocks live in the test file via vi.mock.
+import "@testing-library/jest-dom/vitest";
+import { cleanup } from "@testing-library/react";
+import { afterEach } from "vitest";
+
+afterEach(() => {
+  cleanup();
+});

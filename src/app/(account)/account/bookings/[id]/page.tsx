@@ -4,7 +4,7 @@ import { BookingStatus } from "@prisma/client";
 import { requireCustomer } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatDate, formatTime } from "@/lib/format";
-import StatusBadge from "../../status-badge";
+import { Badge, Button } from "@/components/ui";
 import CancelButton from "./cancel-button";
 
 export const metadata = { title: "Booking detail" };
@@ -35,7 +35,7 @@ export default async function CustomerBookingDetailPage({
     CANCELLABLE.includes(booking.status) && new Date(booking.date) >= today;
 
   return (
-    <div className="min-h-screen p-6 md:p-10 max-w-2xl mx-auto space-y-8">
+    <div className="space-y-8">
       <Link
         href="/account"
         className="text-bone-dim hover:text-bone text-sm transition-colors"
@@ -48,7 +48,7 @@ export default async function CustomerBookingDetailPage({
           <h1 className="text-2xl font-display text-bone">
             {booking.serviceSlug.replace(/-/g, " ")}
           </h1>
-          <StatusBadge status={booking.status} />
+          <Badge status={booking.status} />
         </div>
         <p className="text-bone-dim">
           {formatDate(booking.date)} · {formatTime(booking.timeWindow)}
@@ -88,16 +88,21 @@ export default async function CustomerBookingDetailPage({
         )}
       </dl>
 
-      {canCancel ? (
-        <CancelButton bookingId={booking.id} />
-      ) : booking.status === BookingStatus.CANCELLED ? (
-        <p className="text-sm text-bone-dim">This booking is cancelled.</p>
-      ) : (
-        <p className="text-sm text-bone-dim">
-          This booking can no longer be cancelled online. Reach out if you need
-          to change it.
-        </p>
-      )}
+      <div className="flex flex-wrap items-center gap-4">
+        <Button variant="link" asChild>
+          <Link href={`/?rebook=${booking.id}#book`}>Book again →</Link>
+        </Button>
+        {canCancel ? (
+          <CancelButton bookingId={booking.id} />
+        ) : booking.status === BookingStatus.CANCELLED ? (
+          <p className="text-sm text-bone-dim">This booking is cancelled.</p>
+        ) : (
+          <p className="text-sm text-bone-dim">
+            This booking can no longer be cancelled online. Reach out if you need
+            to change it.
+          </p>
+        )}
+      </div>
     </div>
   );
 }

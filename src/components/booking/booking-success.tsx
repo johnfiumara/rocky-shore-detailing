@@ -20,7 +20,8 @@ export default function BookingSuccess({ name }: { name: string }) {
         <em>We&apos;ll be in touch within 24 hours.</em>
       </h3>
       <p className="mt-6 max-w-md mx-auto text-bone-dim leading-relaxed">
-        Aiden reviews each request personally. You&apos;ll get a confirmation email with the quote and a calendar invite once it&apos;s locked in.
+        Aiden reviews each request personally. You&apos;ll get a confirmation
+        email with the quote and a calendar invite once it&apos;s locked in.
       </p>
     </motion.div>
   );

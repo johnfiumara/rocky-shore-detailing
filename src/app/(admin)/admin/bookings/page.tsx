@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { BookingStatus } from "@prisma/client";
 import Link from "next/link";
 import { formatDate, formatTime } from "@/lib/format";
-import { StatusBadge } from "../_components/status-badge";
+import { Badge } from "@/components/ui";
 import { Pagination, parsePageParams } from "../_components/pagination";
 
 export const metadata = { title: "Bookings" };
@@ -105,7 +105,7 @@ export default async function BookingsPage({
                   <td className="px-4 py-3 text-bone-dim">{formatDate(b.date)}</td>
                   <td className="px-4 py-3 text-bone-dim hidden md:table-cell">{formatTime(b.timeWindow)}</td>
                   <td className="px-4 py-3">
-                    <StatusBadge status={b.status} />
+                    <Badge status={b.status} />
                   </td>
                 </tr>
               ))}

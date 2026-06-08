@@ -22,8 +22,8 @@ export default function BookingProgress({ step }: { step: 0 | 1 | 2 }) {
                 isCurrent
                   ? "border-bronze bg-bronze/15 text-bronze"
                   : isDone
-                  ? "border-bone-dim text-bone-dim"
-                  : "border-line text-mist"
+                    ? "border-bone-dim text-bone-dim"
+                    : "border-line text-mist"
               }`}
             >
               {i + 1}

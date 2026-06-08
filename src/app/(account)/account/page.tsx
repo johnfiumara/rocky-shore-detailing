@@ -2,8 +2,7 @@ import Link from "next/link";
 import { requireCustomer } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatDate, formatTime } from "@/lib/format";
-import { customerLogout } from "./actions";
-import StatusBadge from "./status-badge";
+import { Badge, EmptyState } from "@/components/ui";
 
 export const metadata = { title: "Your bookings" };
 
@@ -25,45 +24,25 @@ export default async function AccountPage() {
   const calendarHref = "/api/account/calendar.ics";
 
   return (
-    <div className="min-h-screen p-6 md:p-10 max-w-3xl mx-auto space-y-10">
-      <header className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-display text-bone">
-            Hi {session.customer.name.split(" ")[0] || "there"}
-          </h1>
-          <p className="text-bone-dim text-sm mt-1">{session.email}</p>
-        </div>
-        <form action={customerLogout}>
-          <button
-            type="submit"
-            className="text-xs uppercase tracking-wider text-bone-dim hover:text-bronze transition-colors"
-          >
-            Sign out
-          </button>
-        </form>
-      </header>
-
+    <div className="space-y-10">
       <section className="space-y-3">
         <div className="flex items-baseline justify-between">
           <h2 className="text-bone-dim text-xs uppercase tracking-wider">
             Bookings
           </h2>
-          <Link
-            href="/#book"
-            className="text-xs text-bronze hover:underline"
-          >
-            Book another →
+          <Link href="/#book" className="text-xs text-bronze hover:underline">
+            Book again →
           </Link>
         </div>
 
         {bookings.length === 0 ? (
-          <p className="text-bone-dim text-sm border border-line rounded-xl p-6">
+          <EmptyState>
             No bookings yet.{" "}
             <Link href="/#book" className="text-bronze hover:underline">
               Book your first detail
             </Link>
             .
-          </p>
+          </EmptyState>
         ) : (
           <ul className="border border-line rounded-xl divide-y divide-line overflow-hidden">
             {bookings.map((b) => (
@@ -76,11 +55,11 @@ export default async function AccountPage() {
                     <div className="text-bone">
                       {formatDate(b.date)} · {formatTime(b.timeWindow)}
                     </div>
-                    <StatusBadge status={b.status} />
+                    <Badge status={b.status} />
                   </div>
                   <div className="text-bone-dim text-sm mt-1">
-                    {b.serviceSlug.replace(/-/g, " ")} ·{" "}
-                    {b.vehicle.year} {b.vehicle.make} {b.vehicle.model}
+                    {b.serviceSlug.replace(/-/g, " ")} · {b.vehicle.year}{" "}
+                    {b.vehicle.make} {b.vehicle.model}
                   </div>
                 </Link>
               </li>

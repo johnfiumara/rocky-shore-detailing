@@ -10,38 +10,41 @@ import {
   TestimonialsSkeleton,
 } from "@/components/skeletons";
 
-// Static imports (kept as-is)
-// const Hero = ...
-// const StorySection = ...
-// const ServicesSection = ...
-
-// Dynamic imports with skeleton loading states
 const ProcessSection = dynamic(
   () => import("@/components/process-section"),
-  { loading: () => <ProcessSkeleton />, ssr: true }
+  { loading: () => <ProcessSkeleton />, ssr: true },
 );
 
 const GallerySection = dynamic(
   () => import("@/components/gallery-section"),
-  { loading: () => <GallerySkeleton />, ssr: true }
+  { loading: () => <GallerySkeleton />, ssr: true },
 );
 
 const TestimonialsSection = dynamic(
   () => import("@/components/testimonials-section"),
-  { loading: () => <TestimonialsSkeleton />, ssr: true }
+  { loading: () => <TestimonialsSkeleton />, ssr: true },
 );
 
 const BookingSection = dynamic(
-  () => import("@/components/booking-section"),
-  { loading: () => <BookingSkeleton />, ssr: true }
+  () =>
+    import("@/components/booking/booking-section-server").then(
+      (mod) => mod.BookingSectionServer,
+    ),
+  { loading: () => <BookingSkeleton />, ssr: true },
 );
 
-const FaqSection = dynamic(
-  () => import("@/components/faq-section"),
-  { loading: () => <FaqSkeleton />, ssr: true }
-);
+const FaqSection = dynamic(() => import("@/components/faq-section"), {
+  loading: () => <FaqSkeleton />,
+  ssr: true,
+});
 
-export default function Page() {
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ rebook?: string }>;
+}) {
+  const { rebook } = await searchParams;
+
   return (
     <>
       <Hero />
@@ -50,7 +53,7 @@ export default function Page() {
       <ProcessSection />
       <GallerySection />
       <TestimonialsSection />
-      <BookingSection />
+      <BookingSection rebookId={rebook} />
       <FaqSection />
     </>
   );

@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { BookingStatus } from "@prisma/client";
 import Link from "next/link";
 import { formatDate } from "@/lib/format";
-import { StatusBadge } from "./_components/status-badge";
+import { Badge } from "@/components/ui";
 
 export const metadata = { title: "Dashboard" };
 
@@ -83,7 +83,7 @@ export default async function AdminDashboard() {
                     </td>
                     <td className="px-4 py-3 text-bone-dim">{formatDate(b.date)}</td>
                     <td className="px-4 py-3">
-                      <StatusBadge status={b.status} />
+                      <Badge status={b.status} />
                     </td>
                   </tr>
                 ))}

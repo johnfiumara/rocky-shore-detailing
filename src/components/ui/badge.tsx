@@ -8,7 +8,7 @@ const STATUS_STYLES: Record<BookingStatus, { label: string; className: string }>
   CANCELLED: { label: "Cancelled", className: "bg-red-400/10 text-red-400" },
 };
 
-export function StatusBadge({ status }: { status: BookingStatus }) {
+export function Badge({ status }: { status: BookingStatus }) {
   const { label, className } = STATUS_STYLES[status];
   return (
     <span className={`inline-block px-2 py-0.5 rounded-full text-xs ${className}`}>
