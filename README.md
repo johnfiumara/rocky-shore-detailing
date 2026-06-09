@@ -7,7 +7,7 @@ Cinematic single-page site for **Rocky Shore Detailing** — a Maine-statewide m
 ```bash
 npm install
 cp .env.example .env.local
-# edit .env.local — at minimum set RESEND_API_KEY
+# edit .env.local — at minimum set DATABASE_URL, the Supabase keys, and RESEND_API_KEY
 npm run dev
 ```
 
@@ -18,9 +18,11 @@ Site runs at `http://localhost:3000`.
 | Var | Required? | Default | Notes |
 |---|---|---|---|
 | `DATABASE_URL` | yes | — | Postgres connection string. Use a *pooled* URL in production (Neon `-pooler`, Supabase port 6543). |
-| `ADMIN_JWT_SECRET` | yes | — | Signs the admin session cookie. Generate: `openssl rand -base64 48`. App refuses to boot the admin area without it. |
-| `ADMIN_PASSWORD_HASH` | yes | — | bcrypt hash of the admin login password. Generate: `node -e "console.log(require('bcryptjs').hashSync('your-password',12))"`. |
+| `NEXT_PUBLIC_SUPABASE_URL` | yes | — | Supabase project URL. Used by Supabase Auth (admin login) and the CMS data layer. |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | yes | — | Supabase anon (public) key. Safe to expose; RLS gates access. |
+| `SUPABASE_SERVICE_ROLE_KEY` | yes | — | Supabase service-role key. Server-only — never expose to the client. Used by admin user-invite and storage signing. |
 | `RESEND_API_KEY` | yes | — | Get one free at https://resend.com (3,000 emails/mo). Without this, booking submissions return 502. |
+| `NEXT_PUBLIC_SITE_URL` | no | `http://localhost:3000` | Base URL used in admin user-invite email links. Set to your production hostname in prod. |
 | `BOOKING_TO_EMAIL` | no | `fumarajohn8@gmail.com` | Where bookings land. |
 | `BOOKING_FROM_EMAIL` | no | `Rocky Shore Bookings <onboarding@resend.dev>` | Resend's testing sender until you verify a custom domain at https://resend.com/domains. |
 
@@ -45,11 +47,19 @@ The site is host-neutral — it ships with a `netlify.toml` and works the same o
 **2. Set the required env vars** in your host's dashboard:
 
 - `DATABASE_URL`
-- `ADMIN_JWT_SECRET` — generate with `openssl rand -base64 48`
-- `ADMIN_PASSWORD_HASH` — generate with `node -e "console.log(require('bcryptjs').hashSync('your-password',12))"`
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
 - `RESEND_API_KEY`
+- `NEXT_PUBLIC_SITE_URL` (optional but recommended — used by admin invite emails)
 
 See the table above for optional vars.
+
+Admin login uses Supabase Auth + a `user_role` table for `admin` / `editor` roles. Provision the first admin with:
+
+```bash
+npm run provision:admin
+```
 
 **3. Push the schema to the new database** (the build step does *not* do this automatically):
 
