@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   createFaqItem,
   deleteFaqItem,
@@ -19,7 +20,8 @@ type FaqItem = {
   sortOrder: number;
 };
 
-const initialState: { error: string } = { error: "" };
+type FaqActionState = { error: string } | { ok: true };
+const initialState: FaqActionState = { error: "" };
 
 export default function FaqManager({
   faqItems,
@@ -28,7 +30,20 @@ export default function FaqManager({
 }) {
   const [state, action, pending] = useActionState(createFaqItem, initialState);
   const [items, setItems] = useState(faqItems);
+  const [success, setSuccess] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  const router = useRouter();
   const [, start] = useTransition();
+
+  useEffect(() => {
+    if (state && "ok" in state && state.ok) {
+      setSuccess(true);
+      formRef.current?.reset();
+      router.refresh();
+      const timer = setTimeout(() => setSuccess(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [state, router]);
 
   const move = (index: number, dir: -1 | 1) => {
     const next = index + dir;
@@ -62,7 +77,7 @@ export default function FaqManager({
         <summary className="px-4 py-3 text-sm text-bone-dim cursor-pointer hover:text-bone">
           + Add FAQ item
         </summary>
-        <form action={action} className="px-4 pb-4 space-y-3">
+        <form ref={formRef} action={action} className="px-4 pb-4 space-y-3">
           <input
             name="question"
             required
@@ -77,6 +92,7 @@ export default function FaqManager({
             className="w-full bg-surface border border-line rounded-lg px-3 py-2 text-bone text-sm focus:outline-none focus:border-bronze resize-none"
           />
           {state?.error && <p className="text-red-400 text-xs">{state.error}</p>}
+          {success && <p className="text-green-400 text-xs">FAQ item added.</p>}
           <button type="submit" disabled={pending} className="btn-primary text-sm disabled:opacity-50">
             {pending ? "Adding…" : "Add"}
           </button>

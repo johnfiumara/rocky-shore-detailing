@@ -26,41 +26,56 @@ export function PhotosStep({
     formState: { errors },
   } = useFormContext<BookingInput>();
 
+  const hasPhone = !!customer?.phone;
+
   return (
     <div className="space-y-10">
       {isSignedIn && customer && (
-        <fieldset className="grid gap-5 md:grid-cols-2">
-          <legend className="sr-only">Contact</legend>
-          <FormField label="Name" htmlFor="booking-name">
-            <Input
-              id="booking-name"
-              type="text"
-              value={customer.name}
-              disabled
-              readOnly
-            />
-          </FormField>
-          <FormField label="Email" htmlFor="booking-email">
-            <Input
-              id="booking-email"
-              type="email"
-              value={customer.email}
-              disabled
-              readOnly
-            />
-          </FormField>
-          <div className="md:col-span-2">
-            <FormField label="Phone" htmlFor="booking-phone">
+        <>
+          <fieldset className="grid gap-5 md:grid-cols-2">
+            <legend className="sr-only">Contact</legend>
+            <FormField label="Name" htmlFor="booking-name">
               <Input
-                id="booking-phone"
-                type="tel"
-                value={customer.phone || "—"}
+                id="booking-name"
+                type="text"
+                value={customer.name}
                 disabled
                 readOnly
               />
             </FormField>
-          </div>
-        </fieldset>
+            <FormField label="Email" htmlFor="booking-email">
+              <Input
+                id="booking-email"
+                type="email"
+                value={customer.email}
+                disabled
+                readOnly
+              />
+            </FormField>
+            <div className="md:col-span-2">
+              <FormField 
+                label="Phone" 
+                error={errors.phone?.message}
+                htmlFor="booking-phone"
+              >
+                <Input
+                  id="booking-phone"
+                  type="tel"
+                  value={hasPhone ? customer.phone || "" : ""}
+                  placeholder={hasPhone ? undefined : "(207) 555-0123"}
+                  disabled={hasPhone}
+                  readOnly={hasPhone}
+                  error={!!errors.phone}
+                  {...(!hasPhone && register("phone"))}
+                />
+              </FormField>
+            </div>
+          </fieldset>
+          {/* Hidden registered fields to ensure values are included in form submission */}
+          <input type="hidden" {...register("name")} value={customer.name} />
+          <input type="hidden" {...register("email")} value={customer.email} />
+          {hasPhone && <input type="hidden" {...register("phone")} value={customer.phone || ""} />}
+        </>
       )}
 
       {!isSignedIn && (

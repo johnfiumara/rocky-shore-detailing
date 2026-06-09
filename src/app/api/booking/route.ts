@@ -198,26 +198,6 @@ export async function POST(request: Request) {
     );
   }
 
-  // Capture the photos the customer attached so staff can review them later
-  // from the admin booking page. This is best-effort — the booking itself is
-  // already persisted, so a storage hiccup here must not fail the request.
-  if (files.length > 0) {
-    try {
-      const photoKeys = await storeBookingPhotos(booking.id, files);
-      if (photoKeys.length > 0) {
-        await prisma.booking.update({
-          where: { id: booking.id },
-          data: { photoKeys },
-        });
-      }
-    } catch (err) {
-      logger.error("booking", "photo storage failed", {
-        error: err instanceof Error ? err.message : String(err),
-        bookingId: booking?.id,
-      });
-    }
-  }
-
   // Only send email if database write succeeded
   try {
     await sendBookingEmail({ data, files });

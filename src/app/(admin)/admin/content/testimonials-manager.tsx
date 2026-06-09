@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   createTestimonial,
   deleteTestimonial,
@@ -20,7 +21,8 @@ type Testimonial = {
   sortOrder: number;
 };
 
-const initialState: { error: string } = { error: "" };
+type TestimonialActionState = { error: string } | { ok: true };
+const initialState: TestimonialActionState = { error: "" };
 
 export default function TestimonialsManager({
   testimonials,
@@ -29,7 +31,20 @@ export default function TestimonialsManager({
 }) {
   const [state, action, pending] = useActionState(createTestimonial, initialState);
   const [items, setItems] = useState(testimonials);
+  const [success, setSuccess] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  const router = useRouter();
   const [, start] = useTransition();
+
+  useEffect(() => {
+    if (state && "ok" in state && state.ok) {
+      setSuccess(true);
+      formRef.current?.reset();
+      router.refresh();
+      const timer = setTimeout(() => setSuccess(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [state, router]);
 
   const move = (index: number, dir: -1 | 1) => {
     const next = index + dir;
@@ -63,7 +78,7 @@ export default function TestimonialsManager({
         <summary className="px-4 py-3 text-sm text-bone-dim cursor-pointer hover:text-bone">
           + Add testimonial
         </summary>
-        <form action={action} className="px-4 pb-4 space-y-3">
+        <form ref={formRef} action={action} className="px-4 pb-4 space-y-3">
           <textarea
             name="quote"
             required
@@ -84,6 +99,7 @@ export default function TestimonialsManager({
             className="w-full bg-surface border border-line rounded-lg px-3 py-2 text-bone text-sm focus:outline-none focus:border-bronze"
           />
           {state?.error && <p className="text-red-400 text-xs">{state.error}</p>}
+          {success && <p className="text-green-400 text-xs">Testimonial added.</p>}
           <button type="submit" disabled={pending} className="btn-primary text-sm disabled:opacity-50">
             {pending ? "Adding…" : "Add"}
           </button>
