@@ -189,10 +189,10 @@ export async function POST(request: Request) {
     // so it's caught separately and logged rather than failing the request.
     if (files.length > 0) {
       try {
-        const photoKeys = await saveBookingPhotos(booking.id, files);
+        const photoKeys = await storeBookingPhotos(booking.id, files);
         booking = await prisma.booking.update({
           where: { id: booking.id },
-          data: { photos: photoKeys },
+          data: { photoKeys: photoKeys },
         });
       } catch (err) {
         logger.error("booking", "photo storage failed", {
