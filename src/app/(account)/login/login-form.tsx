@@ -11,7 +11,10 @@ export default function LoginForm() {
 
   return (
     <form action={action} className="space-y-4">
-      <FormField label="Email" error={state?.error} htmlFor="email">
+      {state?.error && (
+        <p className="text-red-400 text-sm">{state.error}</p>
+      )}
+      <FormField label="Email" htmlFor="email">
         <Input
           id="email"
           name="email"
