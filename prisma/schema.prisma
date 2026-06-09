@@ -83,6 +83,9 @@ model Booking {
   price       Float?
   notes       String?
   adminNotes  String?
+  // Netlify Blobs keys for customer-uploaded vehicle photos attached to this
+  // booking. Empty when no photos were uploaded.
+  photos      String[]      @default([])
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 }
