@@ -1,5 +1,7 @@
 "use client";
 
+// @theatre/core must be imported before @theatre/studio is initialized.
+import "@theatre/core";
 import type studioType from "@theatre/studio";
 
 let studio: typeof studioType | undefined;
