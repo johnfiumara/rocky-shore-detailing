@@ -7,6 +7,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 import { SERVICE_SLUGS, TIME_WINDOWS } from "@/lib/booking-schema";
 import { logger } from "@/lib/logger";
 import { sanitizeHtml } from "@/lib/sanitize";
