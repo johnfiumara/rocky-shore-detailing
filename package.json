@@ -22,7 +22,10 @@
     "cms:seed:gallery": "tsx scripts/seed-gallery.ts",
     "cms:seed": "npm run cms:seed:services && npm run cms:seed:testimonials && npm run cms:seed:faq && npm run cms:seed:process && npm run cms:seed:gallery && npm run cms:seed:settings",
     "cms:seed:settings": "tsx scripts/seed-settings.ts",
-    "verify:public": "tsx scripts/verify-public-reads.ts"
+    "verify:public": "tsx scripts/verify-public-reads.ts",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -72,10 +75,15 @@
     "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
+    "eslint-config-prettier": "^10.1.8",
     "jsdom": "^29.1.1",
+    "prettier": "^3.8.4",
     "tailwindcss": "^4",
     "tsx": "^4.22.3",
     "typescript": "^5",
     "vitest": "^4.1.7"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }
