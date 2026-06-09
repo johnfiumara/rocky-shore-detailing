@@ -51,10 +51,6 @@ export function supabaseAnon() {
           /* no-op: anon reads never need to write cookies */
         },
       },
-      global: {
-        fetch: (input: RequestInfo | URL, init?: RequestInit) =>
-          fetch(input, { ...init, cache: "no-store" }),
-      },
     },
   );
 }
