@@ -7,18 +7,49 @@ datasource db {
 }
 
 model Customer {
-  id        String    @id @default(cuid())
+  id        String            @id @default(cuid())
   name      String
-  email     String    @unique
+  email     String            @unique
+  // Supabase auth.users.id (UUID). Set when a customer signs up.
+  // Stored as String because Prisma can't reference the auth schema.
+  userId    String?           @unique @map("user_id") @db.Uuid
   phone     String?
   address   String?
   city      String?
   zip       String?
   notes     String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
   vehicles  Vehicle[]
   bookings  Booking[]
+  messages  CustomerMessage[]
+}
+
+model CustomerMessage {
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  bookingId  String?
+  channel    String
+  direction  String
+  body       String
+  createdAt  DateTime @default(now())
+
+  @@index([customerId, createdAt])
+}
+
+model Expense {
+  id          String   @id @default(cuid())
+  date        DateTime @db.Date
+  category    String
+  description String
+  amount      Float
+  vendor      String?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([date])
 }
 
 model Vehicle {
@@ -30,6 +61,7 @@ model Vehicle {
   model      String
   color      String
   notes      String?
+  isDefault  Boolean        @default(false)
   createdAt  DateTime       @default(now())
   updatedAt  DateTime       @updatedAt
   bookings   Booking[]
@@ -51,6 +83,8 @@ model Booking {
   price       Float?
   notes       String?
   adminNotes  String?
+  // Netlify Blobs keys for the photos the customer uploaded with the request.
+  photoKeys   String[]      @default([]) @map("photo_keys")
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 }
@@ -64,17 +98,18 @@ enum BookingStatus {
 }
 
 model GalleryImage {
-  id        String   @id @default(cuid())
-  vehicleId String?
-  vehicle   Vehicle? @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
-  src       String
-  alt       String
-  label     String?
-  isBefore  Boolean  @default(false)
-  isAfter   Boolean  @default(false)
-  sortOrder Int      @default(0)
-  published Boolean  @default(true)
-  createdAt DateTime @default(now())
+  id           String   @id @default(cuid())
+  vehicleId    String?
+  vehicle      Vehicle? @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+  mediaAssetId String?  @map("media_asset_id")
+  src          String
+  alt          String
+  label        String?
+  isBefore     Boolean  @default(false)
+  isAfter      Boolean  @default(false)
+  sortOrder    Int      @default(0)
+  published    Boolean  @default(true)
+  createdAt    DateTime @default(now())
 }
 
 model Service {
@@ -117,3 +152,15 @@ model FaqItem {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model ProcessStep {
+  id        String   @id @default(cuid())
+  title     String
+  body      String
+  published Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+

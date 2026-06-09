@@ -73,7 +73,7 @@ const testimonials = [
     sortOrder: 0,
   },
   {
-    quote: "I've used three detailers since moving to Maine. Rocky Shore is the only one I'll let touch my truck again.",
+    quote: "I've used three detailers since moving to Maine. Rocky Coast is the only one I'll let touch my truck again.",
     name: "Sarah B.",
     context: "Bangor · 2022 F-150",
     sortOrder: 1,
@@ -107,7 +107,7 @@ const testimonials = [
 const faqItems = [
   {
     question: "Where do you service?",
-    answer: "Rocky Shore is fully mobile — we come to your driveway, workplace, or wherever your vehicle is parked across Maine.",
+    answer: "Rocky Coast is fully mobile — we come to your driveway, workplace, or wherever your vehicle is parked across Maine.",
     sortOrder: 0,
   },
   {

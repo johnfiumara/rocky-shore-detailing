@@ -1,15 +1,18 @@
-import { requireSession } from "@/lib/session";
+import { requireRole } from "@/lib/auth";
+import { supabaseServer } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { BookingStatus } from "@prisma/client";
 import Link from "next/link";
 import { formatDate } from "@/lib/format";
+import { Badge } from "@/components/ui";
 
 export const metadata = { title: "Dashboard" };
 
 export default async function AdminDashboard() {
-  await requireSession();
+  await requireRole("admin", "editor");
 
-  const [pendingCount, confirmedCount, customerCount, recentBookings] = await Promise.all([
+  const [supabase, pendingCount, confirmedCount, customerCount, recentBookings] = await Promise.all([
+    supabaseServer(),
     prisma.booking.count({ where: { status: BookingStatus.PENDING } }),
     prisma.booking.count({ where: { status: BookingStatus.CONFIRMED } }),
     prisma.customer.count(),
@@ -19,6 +22,9 @@ export default async function AdminDashboard() {
       include: { customer: true, vehicle: true },
     }),
   ]);
+
+  const { data: userData } = await supabase.auth.getUser();
+  const greetingName = userData.user?.email?.split("@")[0] ?? "there";
 
   const stats = [
     { label: "Pending", value: pendingCount, href: "/admin/bookings?status=PENDING", accent: "text-amber-400" },
@@ -30,7 +36,7 @@ export default async function AdminDashboard() {
     <div className="p-6 md:p-8 pt-20 md:pt-8 max-w-5xl mx-auto space-y-10">
       <div>
         <h1 className="text-2xl font-display text-bone">Dashboard</h1>
-        <p className="text-bone-dim text-sm mt-1">Welcome back, Aiden.</p>
+        <p className="text-bone-dim text-sm mt-1">Welcome back, {greetingName}.</p>
       </div>
 
       <div className="grid grid-cols-3 gap-4">
@@ -77,7 +83,7 @@ export default async function AdminDashboard() {
                     </td>
                     <td className="px-4 py-3 text-bone-dim">{formatDate(b.date)}</td>
                     <td className="px-4 py-3">
-                      <StatusBadge status={b.status} />
+                      <Badge status={b.status} />
                     </td>
                   </tr>
                 ))}
@@ -87,21 +93,5 @@ export default async function AdminDashboard() {
         </div>
       </div>
     </div>
-  );
-}
-
-function StatusBadge({ status }: { status: BookingStatus }) {
-  const map: Record<BookingStatus, { label: string; className: string }> = {
-    PENDING: { label: "Pending", className: "bg-amber-400/10 text-amber-400" },
-    CONFIRMED: { label: "Confirmed", className: "bg-emerald-400/10 text-emerald-400" },
-    IN_PROGRESS: { label: "In Progress", className: "bg-blue-400/10 text-blue-400" },
-    COMPLETED: { label: "Completed", className: "bg-bone/10 text-bone-dim" },
-    CANCELLED: { label: "Cancelled", className: "bg-red-400/10 text-red-400" },
-  };
-  const { label, className } = map[status];
-  return (
-    <span className={`inline-block px-2 py-0.5 rounded-full text-xs ${className}`}>
-      {label}
-    </span>
   );
 }

@@ -1,8 +1,10 @@
-import { requireSession } from "@/lib/session";
+import { requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { BookingStatus } from "@prisma/client";
 import Link from "next/link";
 import { formatDate, formatTime } from "@/lib/format";
+import { Badge } from "@/components/ui";
+import { Pagination, parsePageParams } from "../_components/pagination";
 
 export const metadata = { title: "Bookings" };
 
@@ -19,24 +21,42 @@ function isValidStatus(s: string): s is BookingStatus {
   return Object.values(BookingStatus).includes(s as BookingStatus);
 }
 
+type SearchParams = {
+  status?: string;
+  page?: string;
+  pageSize?: string;
+};
+
 export default async function BookingsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<SearchParams>;
 }) {
-  await requireSession();
-  const { status } = await searchParams;
+  await requireRole("admin");
+  const params = await searchParams;
+  const { status } = params;
+  const { page, pageSize, skip, take } = parsePageParams(params);
 
-  const bookings = await prisma.booking.findMany({
-    where: status && isValidStatus(status) ? { status } : undefined,
-    orderBy: { date: "asc" },
-    include: { customer: true, vehicle: true },
-  });
+  const where = status && isValidStatus(status) ? { status } : undefined;
+
+  const [bookings, total] = await Promise.all([
+    prisma.booking.findMany({
+      where,
+      orderBy: { date: "asc" },
+      include: { customer: true, vehicle: true },
+      skip,
+      take,
+    }),
+    prisma.booking.count({ where }),
+  ]);
 
   return (
     <div className="p-6 md:p-8 pt-20 md:pt-8 max-w-5xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <h1 className="text-2xl font-display text-bone">Bookings</h1>
+        <Link href="/admin/bookings/new" className="btn-primary text-sm">
+          + New booking
+        </Link>
       </div>
 
       {/* Status filter */}
@@ -85,7 +105,7 @@ export default async function BookingsPage({
                   <td className="px-4 py-3 text-bone-dim">{formatDate(b.date)}</td>
                   <td className="px-4 py-3 text-bone-dim hidden md:table-cell">{formatTime(b.timeWindow)}</td>
                   <td className="px-4 py-3">
-                    <StatusBadge status={b.status} />
+                    <Badge status={b.status} />
                   </td>
                 </tr>
               ))}
@@ -93,18 +113,14 @@ export default async function BookingsPage({
           </table>
         )}
       </div>
+
+      <Pagination
+        basePath="/admin/bookings"
+        page={page}
+        pageSize={pageSize}
+        total={total}
+        preserve={{ status }}
+      />
     </div>
   );
-}
-
-function StatusBadge({ status }: { status: BookingStatus }) {
-  const map: Record<BookingStatus, { label: string; className: string }> = {
-    PENDING: { label: "Pending", className: "bg-amber-400/10 text-amber-400" },
-    CONFIRMED: { label: "Confirmed", className: "bg-emerald-400/10 text-emerald-400" },
-    IN_PROGRESS: { label: "In Progress", className: "bg-blue-400/10 text-blue-400" },
-    COMPLETED: { label: "Completed", className: "bg-bone/10 text-bone-dim" },
-    CANCELLED: { label: "Cancelled", className: "bg-red-400/10 text-red-400" },
-  };
-  const { label, className } = map[status];
-  return <span className={`inline-block px-2 py-0.5 rounded-full text-xs ${className}`}>{label}</span>;
 }

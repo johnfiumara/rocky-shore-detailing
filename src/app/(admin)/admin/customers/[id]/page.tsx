@@ -1,8 +1,9 @@
-import { requireSession } from "@/lib/session";
+import { requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { formatDate } from "@/lib/format";
+import MessageThread from "./message-thread";
 
 export const metadata = { title: "Customer Detail" };
 
@@ -11,7 +12,7 @@ export default async function CustomerDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requireSession();
+  await requireRole("admin");
   const { id } = await params;
 
   const customer = await prisma.customer.findUnique({
@@ -22,6 +23,7 @@ export default async function CustomerDetailPage({
         orderBy: { date: "desc" },
         include: { vehicle: true },
       },
+      messages: { orderBy: { createdAt: "desc" } },
     },
   });
 
@@ -61,6 +63,12 @@ export default async function CustomerDetailPage({
       <div className="border border-line rounded-xl p-4">
         <p className="text-bone-dim text-xs uppercase tracking-wider mb-2">Notes</p>
         <p className="text-bone text-sm whitespace-pre-wrap">{customer.notes || "—"}</p>
+      </div>
+
+      {/* Communication */}
+      <div>
+        <h2 className="text-bone-dim text-xs uppercase tracking-wider mb-3">Communication</h2>
+        <MessageThread customerId={customer.id} messages={customer.messages} />
       </div>
 
       {/* Booking history */}

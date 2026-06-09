@@ -1,59 +1,65 @@
-import { prisma } from "@/lib/prisma";
 import {
   galleryGrid as staticGrid,
   beforeAfterPair as staticPair,
   type BeforeAfterPair,
 } from "@/data/gallery";
+import { getSetting } from "@/lib/cms/settings";
+import { fetchPublishedRows } from "@/lib/cms/published-list";
 
 export type CmsGalleryImage = { src: string; alt: string };
 
-/**
- * Published gallery tiles from the database, ordered by `sortOrder`.
- * Falls back to the static grid when the table is empty or unreachable,
- * so the site always renders.
- */
 export async function getGalleryImages(): Promise<CmsGalleryImage[]> {
-  try {
-    const rows = await prisma.galleryImage.findMany({
-      where: { published: true },
-      orderBy: { sortOrder: "asc" },
-      select: { src: true, alt: true },
-    });
-    return rows.length > 0 ? rows : staticGrid;
-  } catch {
-    return staticGrid;
-  }
+  const rows = await fetchPublishedRows<CmsGalleryImage>({
+    scope: "gallery",
+    noun: "gallery images",
+    table: "GalleryImage",
+    columns: "src, alt",
+  });
+
+  return rows ?? staticGrid;
 }
 
-/**
- * Best before/after pair from the database: the first image flagged
- * `isBefore`, matched to an `isAfter` from the same vehicle when possible
- * (otherwise any `isAfter`). Falls back to the static pair when no suitable
- * pair exists or the query fails.
- */
+type PairRow = {
+  src: string;
+  alt: string;
+  vehicleId: string | null;
+  isBefore: boolean;
+  isAfter: boolean;
+  sortOrder: number;
+};
+
 export async function getBeforeAfterPair(): Promise<BeforeAfterPair> {
-  try {
-    const rows = await prisma.galleryImage.findMany({
-      where: { published: true },
-      orderBy: { sortOrder: "asc" },
-      select: { src: true, alt: true, vehicleId: true, isBefore: true, isAfter: true },
+  const rows = await fetchPublishedRows<PairRow>({
+    scope: "gallery",
+    noun: "before/after images",
+    table: "GalleryImage",
+    columns: "src, alt, vehicleId, isBefore, isAfter, sortOrder",
+    errorMessage: "[cms:gallery] Failed to fetch before/after pair",
+  });
+  if (!rows) return staticPair;
+
+  const before = rows.find((r) => r.isBefore);
+  if (!before) {
+    console.warn("[cms:gallery] No GalleryImage marked isBefore=true — using static pair", {
+      timestamp: new Date().toISOString(),
     });
-    if (rows.length === 0) return staticPair;
-
-    const before = rows.find((row) => row.isBefore);
-    if (!before) return staticPair;
-
-    const after =
-      rows.find((row) => row.isAfter && row.vehicleId && row.vehicleId === before.vehicleId) ??
-      rows.find((row) => row.isAfter);
-    if (!after) return staticPair;
-
-    return {
-      label: staticPair.label,
-      before: { src: before.src, alt: before.alt },
-      after: { src: after.src, alt: after.alt },
-    };
-  } catch {
     return staticPair;
   }
+
+  const after =
+    rows.find((r) => r.isAfter && r.vehicleId && r.vehicleId === before.vehicleId) ??
+    rows.find((r) => r.isAfter);
+  if (!after) {
+    console.warn("[cms:gallery] No GalleryImage marked isAfter=true — using static pair", {
+      timestamp: new Date().toISOString(),
+    });
+    return staticPair;
+  }
+
+  const label = (await getSetting<string>("gallery.before_after_label")) ?? "Recent detail";
+  return {
+    label,
+    before: { src: before.src, alt: before.alt },
+    after: { src: after.src, alt: after.alt },
+  };
 }

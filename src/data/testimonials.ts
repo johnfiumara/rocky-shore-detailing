@@ -13,7 +13,7 @@ export const testimonials: Testimonial[] = [
   },
   {
     quote:
-      "I've used three detailers since moving to Maine. Rocky Shore is the only one I'll let touch my truck again.",
+      "I've used three detailers since moving to Maine. Rocky Coast is the only one I'll let touch my truck again.",
     name: "Sarah B.",
     context: "Bangor · 2022 F-150",
   },

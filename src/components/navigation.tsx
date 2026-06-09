@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Menu, X } from "lucide-react";
+import { supabaseBrowser } from "@/lib/supabase/client";
 
 const NAV_LINKS = [
   { href: "#story", label: "Story" },
@@ -15,6 +17,7 @@ export default function Navigation() {
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [open, setOpen] = useState(false);
+  const [signedIn, setSignedIn] = useState(false);
 
   useEffect(() => {
     let lastY = window.scrollY;
@@ -28,6 +31,20 @@ export default function Navigation() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    let active = true;
+    void (async () => {
+      const { data } = await supabaseBrowser().auth.getUser();
+      if (active) setSignedIn(!!data?.user);
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const accountHref = signedIn ? "/account" : "/login";
+  const accountLabel = signedIn ? "My bookings" : "Sign in";
+
   return (
     <header
       className={`fixed top-0 inset-x-0 z-50 transition-transform duration-500 ${
@@ -40,7 +57,7 @@ export default function Navigation() {
         }`}
       >
         <a href="#top" className="flex items-baseline gap-2 font-display text-bone text-xl tracking-tight">
-          <span>Rocky Shore</span>
+          <span>Rocky Coast</span>
           <span className="text-bronze italic font-light">Detailing</span>
         </a>
         <nav className="hidden md:flex items-center gap-8">
@@ -53,6 +70,12 @@ export default function Navigation() {
               {l.label}
             </a>
           ))}
+          <Link
+            href={accountHref}
+            className="font-mono-accent text-[11px] tracking-[0.2em] uppercase text-bone-dim hover:text-bronze transition-colors"
+          >
+            {accountLabel}
+          </Link>
         </nav>
         <a href="#book" className="hidden md:inline-flex btn-primary text-sm">Book a Detail</a>
         <button
@@ -76,6 +99,13 @@ export default function Navigation() {
               {l.label}
             </a>
           ))}
+          <Link
+            href={accountHref}
+            onClick={() => setOpen(false)}
+            className="font-display text-3xl text-bone hover:text-bronze transition-colors"
+          >
+            {accountLabel}
+          </Link>
           <a href="#book" onClick={() => setOpen(false)} className="btn-primary self-start mt-4">
             Book a Detail
           </a>

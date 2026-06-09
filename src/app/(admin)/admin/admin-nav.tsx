@@ -12,6 +12,11 @@ import {
   LogOut,
   Menu,
   X,
+  Images,
+  Settings,
+  ShieldCheck,
+  Receipt,
+  PiggyBank,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -20,8 +25,13 @@ const NAV = [
   { href: "/admin/schedule", label: "Schedule", icon: CalendarDays },
   { href: "/admin/bookings", label: "Bookings", icon: FileText },
   { href: "/admin/customers", label: "Customers", icon: Users },
+  { href: "/admin/expenses", label: "Expenses", icon: Receipt },
+  { href: "/admin/budget", label: "Budget", icon: PiggyBank },
   { href: "/admin/gallery", label: "Gallery", icon: Image },
+  { href: "/admin/media", label: "Media", icon: Images },
   { href: "/admin/content", label: "Content", icon: FileText },
+  { href: "/admin/settings", label: "Settings", icon: Settings },
+  { href: "/admin/users", label: "Users", icon: ShieldCheck },
 ];
 
 export default function AdminNav() {
@@ -55,7 +65,7 @@ export default function AdminNav() {
     <>
       {/* Mobile top bar */}
       <div className="md:hidden fixed top-0 inset-x-0 z-40 flex items-center justify-between px-4 py-3 bg-ink border-b border-line">
-        <span className="font-display text-bone text-lg">Rocky Shore Admin</span>
+        <span className="font-display text-bone text-lg">Rocky Coast Admin</span>
         <button onClick={() => setOpen((v) => !v)} className="text-bone p-1">
           {open ? <X size={20} /> : <Menu size={20} />}
         </button>
@@ -76,7 +86,7 @@ export default function AdminNav() {
       {/* Desktop sidebar */}
       <aside className="hidden md:flex flex-col w-56 border-r border-line bg-ink shrink-0 p-4 gap-6 sticky top-0 h-screen">
         <div className="px-3 py-2">
-          <p className="font-display text-bone text-sm">Rocky Shore</p>
+          <p className="font-display text-bone text-sm">Rocky Coast</p>
           <p className="text-bone-dim text-xs mt-0.5">Admin</p>
         </div>
 
@@ -91,3 +101,5 @@ export default function AdminNav() {
     </>
   );
 }
+
+

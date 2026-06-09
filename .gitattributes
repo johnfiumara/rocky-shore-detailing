@@ -1,0 +1,19 @@
+# Enforce LF line endings in the repository for all text files.
+# Prevents cross-platform CRLF/LF churn (e.g. Windows editors flipping every file).
+* text=auto eol=lf
+
+# Binary assets — never normalize.
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.webp  binary
+*.avif  binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.otf   binary
+*.wasm  binary
+*.eszip binary
+*.pdf   binary

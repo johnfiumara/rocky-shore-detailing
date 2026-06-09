@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ArrowDown } from "lucide-react";
+import "@/lib/theatre-studio";
 import HeroCanvas from "./hero-canvas";
 import { getHeroSheet } from "./hero-timeline";
 
