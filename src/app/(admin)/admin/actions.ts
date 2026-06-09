@@ -113,6 +113,39 @@ export async function changePassword(_: unknown, formData: FormData) {
   return { ok: true };
 }
 
+export async function inviteUser(prevState: { error: string; success: boolean }, formData: FormData) {
+  await requireRole("admin");
+  const email = formData.get("email") as string;
+  const role = formData.get("role") as "admin" | "editor";
+  if (!email || !role) return { error: "Email and role are required", success: false };
+  
+  const base = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const { supabaseAdmin } = await import("@/lib/supabase/admin");
+  const admin = supabaseAdmin();
+  
+  const { data, error } = await admin.auth.admin.inviteUserByEmail(email, {
+    redirectTo: base + "/admin/login",
+  });
+  
+  if (error) {
+    logger.error("invite-user", "Supabase rejected invite", error);
+    return { error: `Failed to invite user: ${error.message}`, success: false };
+  }
+  
+  if (!data) {
+    return { error: "Failed to invite user: no data returned", success: false };
+  }
+  
+  try {
+    await admin.from("user_role").insert({ user_id: data.user.id, role });
+    revalidatePath("/admin/users");
+    return { error: "", success: true };
+  } catch (err) {
+    logger.error("invite-user", "Failed to assign role", err);
+    return { error: "Failed to assign role to user", success: false };
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Bookings
 // ---------------------------------------------------------------------------

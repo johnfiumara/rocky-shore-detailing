@@ -1,59 +1,80 @@
-"use client";
+import { requireRole } from "@/lib/auth";
+import { supabaseAdmin } from "@/lib/supabase/admin";
+import { supabaseServer } from "@/lib/supabase/server";
+import { revalidatePath } from "next/cache";
+import InviteForm from "./invite-form";
 
-import { useActionState } from "react";
+export const metadata = { title: "Users" };
 
-export default function UsersPage() {
-  const [state, formAction, pending] = useActionState(inviteAction, initialState);
+export default async function UsersPage() {
+  await requireRole("admin");
+
+  const admin = supabaseAdmin();
+
+  const [{ data: usersData }, { data: roles }] = await Promise.all([
+    admin.auth.admin.listUsers(),
+    supabaseServer().then((sb) => sb.from("user_role").select("user_id, role")),
+  ]);
+
+  const roleById = Object.fromEntries(roles?.map((r) => [r.user_id, r.role]) ?? []);
+  const users = (usersData?.users ?? []).map((u) => ({
+    id: u.id,
+    email: u.email ?? "—",
+    role: roleById[u.id] ?? "none",
+  }));
+
+  async function revoke(userId: string) {
+    "use server";
+    await requireRole("admin");
+    await supabaseAdmin().from("user_role").delete().eq("user_id", userId);
+    revalidatePath("/admin/users");
+  }
 
   return (
     <div className="p-6 md:p-8 pt-20 md:pt-8 max-w-4xl mx-auto space-y-8">
       <h1 className="text-2xl font-display text-bone">Users</h1>
 
-      <div className="border border-line rounded-xl p-4">
-        <h2 className="text-bone-dim text-xs uppercase tracking-wider mb-3">Invite User</h2>
-        <form action={formAction} className="flex gap-3">
-          <input
-            name="email"
-            type="email"
-            required
-            placeholder="Email"
-            className="flex-1 bg-ink border border-line rounded-lg px-3 py-2 text-bone text-sm focus:outline-none focus:border-bronze"
-          />
-          <select
-            name="role"
-            required
-            className="bg-ink border border-line rounded-lg px-3 py-2 text-bone text-sm focus:outline-none focus:border-bronze"
-          >
-            <option value="editor">Editor</option>
-            <option value="admin">Admin</option>
-          </select>
-          <button type="submit" disabled={pending} className="btn-primary text-sm disabled:opacity-50">
-            {pending ? "Inviting..." : "Invite"}
-          </button>
-        </form>
-        {state?.error && <p className="text-red-400 text-sm mt-2">{state.error}</p>}
-        {state?.success && <p className="text-emerald-400 text-sm mt-2">User invited successfully!</p>}
-      </div>
+      <InviteForm />
 
-      {/* User list will be rendered server-side */}
-      <div id="user-list" />
+      <div className="border border-line rounded-xl overflow-hidden">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-line text-left">
+              <th className="px-4 py-3 text-bone-dim font-normal text-xs uppercase tracking-wider">Email</th>
+              <th className="px-4 py-3 text-bone-dim font-normal text-xs uppercase tracking-wider">Role</th>
+              <th className="px-4 py-3 text-bone-dim font-normal text-xs uppercase tracking-wider"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map((u) => (
+              <tr key={u.id} className="border-b border-line last:border-0">
+                <td className="px-4 py-3 text-bone">{u.email}</td>
+                <td className="px-4 py-3">
+                  <span className={`inline-block px-2 py-0.5 rounded-full text-xs ${
+                    u.role === "admin" ? "bg-bronze/10 text-bronze" :
+                    u.role === "editor" ? "bg-emerald-400/10 text-emerald-400" :
+                    "bg-line text-bone-dim"
+                  }`}>
+                    {u.role}
+                  </span>
+                </td>
+                <td className="px-4 py-3">
+                  {u.role !== "none" && (
+                    <form action={revoke.bind(null, u.id)}>
+                      <button
+                        type="submit"
+                        className="text-xs text-red-400 hover:text-red-300 transition-colors"
+                      >
+                        Revoke
+                      </button>
+                    </form>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
-}
-
-const initialState = { error: "", success: false };
-
-async function inviteAction(_: unknown, formData: FormData) {
-  "use server";
-  // This is a placeholder - the actual implementation would be server-side
-  const email = formData.get("email") as string;
-  const role = formData.get("role") as "admin" | "editor";
-  
-  if (!email || !role) {
-    return { error: "Email and role are required" };
-  }
-  
-  // The actual server-side logic would go here
-  // For now, we'll just return a success message
-  return { success: true };
 }
