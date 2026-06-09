@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getBookingPhoto } from "@/lib/booking-photos";
+import { getBookingPhoto, contentTypeForKey } from "@/lib/booking-photos";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -23,9 +23,9 @@ export async function GET(
 
   const booking = await prisma.booking.findUnique({
     where: { id },
-    select: { photos: true },
+    select: { photoKeys: true },
   });
-  if (!booking || !booking.photos.includes(key)) {
+  if (!booking || !booking.photoKeys.includes(key)) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
@@ -34,9 +34,9 @@ export async function GET(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  return new NextResponse(photo.body, {
+  return new NextResponse(photo, {
     headers: {
-      "Content-Type": photo.contentType,
+      "Content-Type": contentTypeForKey(key),
       "Cache-Control": "private, max-age=3600",
     },
   });
