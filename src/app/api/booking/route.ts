@@ -5,6 +5,7 @@ import { bookingSchema, validateFiles } from "@/lib/booking-schema";
 import { sendBookingEmail } from "@/lib/send-booking-email";
 import { storeBookingPhotos } from "@/lib/booking-photos";
 import { prisma } from "@/lib/prisma";
+import type { Booking } from "@prisma/client";
 import { logger } from "@/lib/logger";
 import { supabaseServer } from "@/lib/supabase/server";
 
@@ -182,6 +183,24 @@ export async function POST(request: Request) {
         notes: data.notes,
       },
     });
+
+    // Persist any uploaded vehicle photos to blob storage and record their
+    // keys on the booking. A photo-storage failure must not lose the booking,
+    // so it's caught separately and logged rather than failing the request.
+    if (files.length > 0) {
+      try {
+        const photoKeys = await saveBookingPhotos(booking.id, files);
+        booking = await prisma.booking.update({
+          where: { id: booking.id },
+          data: { photos: photoKeys },
+        });
+      } catch (err) {
+        logger.error("booking", "photo storage failed", {
+          error: err instanceof Error ? err.message : String(err),
+          bookingId: booking.id,
+        });
+      }
+    }
   } catch (err) {
     const errorMessage =
       err instanceof Error ? err.message : String(err);
