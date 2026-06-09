@@ -3,6 +3,7 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { bookingSchema, validateFiles } from "@/lib/booking-schema";
 import { sendBookingEmail } from "@/lib/send-booking-email";
+import { storeBookingPhotos } from "@/lib/booking-photos";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { supabaseServer } from "@/lib/supabase/server";
@@ -127,7 +128,7 @@ export async function POST(request: Request) {
   }
 
   // Upsert customer → upsert vehicle → create booking
-  let booking: any;
+  let booking: { id: string } | undefined;
   try {
     const customer = await prisma.customer.upsert({
       where: { email: data.email },
@@ -194,6 +195,26 @@ export async function POST(request: Request) {
       { success: false, error: "Booking could not be saved. Please try again." },
       { status: 500 },
     );
+  }
+
+  // Capture the photos the customer attached so staff can review them later
+  // from the admin booking page. This is best-effort — the booking itself is
+  // already persisted, so a storage hiccup here must not fail the request.
+  if (files.length > 0) {
+    try {
+      const photoKeys = await storeBookingPhotos(booking.id, files);
+      if (photoKeys.length > 0) {
+        await prisma.booking.update({
+          where: { id: booking.id },
+          data: { photoKeys },
+        });
+      }
+    } catch (err) {
+      logger.error("booking", "photo storage failed", {
+        error: err instanceof Error ? err.message : String(err),
+        bookingId: booking?.id,
+      });
+    }
   }
 
   // Only send email if database write succeeded
