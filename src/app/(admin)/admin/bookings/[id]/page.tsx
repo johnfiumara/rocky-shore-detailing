@@ -72,6 +72,35 @@ export default async function BookingDetailPage({
         <p className="text-bone-dim text-xs uppercase tracking-wider mb-2">Admin Notes</p>
         <p className="text-bone text-sm whitespace-pre-wrap">{booking.adminNotes || "—"}</p>
       </div>
+
+      {booking.photos.length > 0 && (
+        <div className="border border-line rounded-xl p-4">
+          <p className="text-bone-dim text-xs uppercase tracking-wider mb-3">
+            Customer Photos ({booking.photos.length})
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {booking.photos.map((key) => {
+              const src = `/api/admin/bookings/${booking.id}/photo?key=${encodeURIComponent(key)}`;
+              return (
+                <a
+                  key={key}
+                  href={src}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block overflow-hidden rounded-lg border border-line"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={src}
+                    alt="Customer-uploaded vehicle photo"
+                    className="w-full h-32 object-cover transition-opacity hover:opacity-80"
+                  />
+                </a>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
