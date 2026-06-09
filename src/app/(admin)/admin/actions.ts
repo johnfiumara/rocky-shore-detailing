@@ -121,7 +121,6 @@ export async function inviteUser(prevState: { error: string; success: boolean },
   if (!email || !role) return { error: "Email and role are required", success: false };
   
   const base = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-  const { supabaseAdmin } = await import("@/lib/supabase/admin");
   const admin = supabaseAdmin();
   
   const { data, error } = await admin.auth.admin.inviteUserByEmail(email, {
