@@ -1,75 +1,72 @@
-/**
- * Persistence for customer-uploaded vehicle photos attached to a booking.
- *
- * Photos are unstructured binary objects, so they live in a site-level
- * Netlify Blobs store (persisting across deploys) rather than the Postgres
- * database. The blob keys are stored on the Booking row so they can be listed
- * and served back without relying on eventual-consistent prefix listing.
- *
- * Key format: `bookings/<bookingId>/<index>-<sanitized-filename>`
- */
-
-import { getStore } from "@netlify/blobs";
+import { getStore, getDeployStore } from "@netlify/blobs";
 
 const STORE_NAME = "booking-photos";
 
-function store() {
-  return getStore(STORE_NAME);
+const EXT_CONTENT_TYPE: Record<string, string> = {
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp",
+  gif: "image/gif",
+  heic: "image/heic",
+  heif: "image/heif",
+  avif: "image/avif",
+};
+
+// Site-level store in production so photos survive redeploys; deploy-scoped
+// elsewhere so preview/branch uploads don't pollute the production store.
+// When the deploy context is unknown (e.g. local tooling) we default to the
+// persistent site store.
+function photoStore() {
+  const deployContext = (
+    globalThis as {
+      Netlify?: { context?: { deploy?: { context?: string } } };
+    }
+  ).Netlify?.context?.deploy?.context;
+
+  return deployContext && deployContext !== "production"
+    ? getDeployStore(STORE_NAME)
+    : getStore(STORE_NAME);
 }
 
-function sanitizeName(name: string): string {
-  const cleaned = name
-    .toLowerCase()
-    .replace(/[^a-z0-9.]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 60);
-  return cleaned || "photo";
+function extFor(file: File): string {
+  const fromName = file.name.split(".").pop()?.toLowerCase();
+  if (fromName && EXT_CONTENT_TYPE[fromName]) return fromName;
+  const fromType = file.type.split("/").pop()?.toLowerCase();
+  if (fromType && EXT_CONTENT_TYPE[fromType]) return fromType;
+  return "jpg";
+}
+
+/** Content type to serve a stored photo with, inferred from its key extension. */
+export function contentTypeForKey(key: string): string {
+  const ext = key.split(".").pop()?.toLowerCase() ?? "";
+  return EXT_CONTENT_TYPE[ext] ?? "application/octet-stream";
 }
 
 /**
- * Uploads the given files to the blob store under the booking's prefix and
- * returns the stored keys (in upload order). Each blob records its original
- * filename and content type as metadata so it can be served back correctly.
+ * Persist the photos a customer uploaded with a booking. Keys are namespaced
+ * by booking id (`<bookingId>/<index>.<ext>`) so they're easy to scope and
+ * validate when serving. Returns the stored keys.
  */
-export async function saveBookingPhotos(
+export async function storeBookingPhotos(
   bookingId: string,
   files: File[],
 ): Promise<string[]> {
-  const s = store();
-  const keys: string[] = [];
+  if (files.length === 0) return [];
 
+  const store = photoStore();
+  const keys: string[] = [];
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
-    const key = `bookings/${bookingId}/${i}-${sanitizeName(file.name)}`;
-    const buffer = await file.arrayBuffer();
-    await s.set(key, buffer, {
-      metadata: {
-        filename: file.name,
-        contentType: file.type || "application/octet-stream",
-      },
-    });
+    const key = `${bookingId}/${i}.${extFor(file)}`;
+    await store.set(key, await file.arrayBuffer());
     keys.push(key);
   }
-
   return keys;
 }
 
-export type BookingPhoto = {
-  body: ArrayBuffer;
-  contentType: string;
-};
-
-/**
- * Reads a single stored photo. Returns null when the key does not exist.
- */
-export async function getBookingPhoto(
-  key: string,
-): Promise<BookingPhoto | null> {
-  const result = await store().getWithMetadata(key, { type: "arrayBuffer" });
-  if (!result) return null;
-  const contentType =
-    typeof result.metadata?.contentType === "string"
-      ? result.metadata.contentType
-      : "application/octet-stream";
-  return { body: result.data, contentType };
+/** Fetch a stored booking photo by key, or null if it doesn't exist. */
+export async function getBookingPhoto(key: string): Promise<ArrayBuffer | null> {
+  const store = photoStore();
+  return (await store.get(key, { type: "arrayBuffer" })) as ArrayBuffer | null;
 }

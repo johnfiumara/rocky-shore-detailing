@@ -34,6 +34,7 @@ Single page composed of anchor sections; all dynamic sections are CMS-driven thr
 - File upload validation (size/type)
 - IP rate limit: 5 / hour (Upstash if `UPSTASH_REDIS_REST_URL` is set, otherwise in-process memory)
 - Customer + Vehicle upsert, Booking insert (Prisma)
+- Uploaded photos persisted to Netlify Blobs (`booking-photos` store), keyed by booking id, and surfaced on the admin booking detail page (served privately via `GET /api/admin/booking-photo?key=…`, staff-auth only)
 - Booking confirmation email via Resend (`src/lib/send-booking-email.ts`)
 - Success screen (`src/components/booking-success.tsx`)
 
@@ -88,7 +89,7 @@ All ~30 mutations follow: `"use server"` → `requireRole` → Zod parse → san
 
 ### Migration not applied yet
 
-This commit changes the schema (adds `Customer.user_id uuid`). Run `npm run db:deploy` (or `npx prisma db push`) against the prod Supabase project before deploying — until then, `Customer` queries will fail at runtime because Prisma expects the column.
+This commit changes the schema (adds `Customer.user_id uuid` and `Booking.photo_keys text[]`). Run `npm run db:deploy` (or `npx prisma db push`) against the prod Supabase project before deploying — until then, `Customer` / `Booking` queries will fail at runtime because Prisma expects the columns.
 
 ### CMS silent-fallback pattern
 
