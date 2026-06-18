@@ -6,19 +6,6 @@
   NODE_VERSION = "24"
   NEXT_TELEMETRY_DISABLED = "1"
 
-# Long-cache user-facing static assets under /public.
-# The @netlify/plugin-nextjs already handles /_next/static/* immutable caching.
-[[headers]]
-  for = "/gallery/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-# Security headers applied site-wide.
-[[headers]]
-  for = "/*"
-  [headers.values]
-    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
-    X-Content-Type-Options = "nosniff"
-    X-Frame-Options = "SAMEORIGIN"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+# Site-wide security headers and gallery cache headers were moved into
+# next.config.ts headers() so they apply on both Netlify and Vercel during
+# the migration. See docs/superpowers/plans/2026-06-18-vercel-migration.md.
