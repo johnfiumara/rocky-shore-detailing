@@ -1,6 +1,6 @@
-import { getStore, getDeployStore } from "@netlify/blobs";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 
-const STORE_NAME = "booking-photos";
+const BUCKET = "booking-photos";
 
 const EXT_CONTENT_TYPE: Record<string, string> = {
   jpg: "image/jpeg",
@@ -13,20 +13,8 @@ const EXT_CONTENT_TYPE: Record<string, string> = {
   avif: "image/avif",
 };
 
-// Site-level store in production so photos survive redeploys; deploy-scoped
-// elsewhere so preview/branch uploads don't pollute the production store.
-// When the deploy context is unknown (e.g. local tooling) we default to the
-// persistent site store.
-function photoStore() {
-  const deployContext = (
-    globalThis as {
-      Netlify?: { context?: { deploy?: { context?: string } } };
-    }
-  ).Netlify?.context?.deploy?.context;
-
-  return deployContext && deployContext !== "production"
-    ? getDeployStore(STORE_NAME)
-    : getStore(STORE_NAME);
+function bucket() {
+  return supabaseAdmin().storage.from(BUCKET);
 }
 
 function extFor(file: File): string {
@@ -54,12 +42,20 @@ export async function storeBookingPhotos(
 ): Promise<string[]> {
   if (files.length === 0) return [];
 
-  const store = photoStore();
   const keys: string[] = [];
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
-    const key = `${bookingId}/${i}.${extFor(file)}`;
-    await store.set(key, await file.arrayBuffer());
+    const ext = extFor(file);
+    const key = `${bookingId}/${i}.${ext}`;
+    const { error } = await bucket().upload(key, await file.arrayBuffer(), {
+      contentType: contentTypeForKey(key),
+      upsert: false,
+    });
+    if (error) {
+      throw new Error(
+        `Failed to upload booking photo ${key}: ${error.message}`,
+      );
+    }
     keys.push(key);
   }
   return keys;
@@ -67,6 +63,7 @@ export async function storeBookingPhotos(
 
 /** Fetch a stored booking photo by key, or null if it doesn't exist. */
 export async function getBookingPhoto(key: string): Promise<ArrayBuffer | null> {
-  const store = photoStore();
-  return (await store.get(key, { type: "arrayBuffer" })) as ArrayBuffer | null;
+  const { data, error } = await bucket().download(key);
+  if (error || !data) return null;
+  return await data.arrayBuffer();
 }

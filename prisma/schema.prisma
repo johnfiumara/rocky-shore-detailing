@@ -83,7 +83,7 @@ model Booking {
   price       Float?
   notes       String?
   adminNotes  String?
-  // Netlify Blobs keys for the photos the customer uploaded with the request.
+  // Supabase Storage keys (`<bookingId>/<index>.<ext>`) in the booking-photos bucket.
   photoKeys   String[]      @default([]) @map("photo_keys")
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
