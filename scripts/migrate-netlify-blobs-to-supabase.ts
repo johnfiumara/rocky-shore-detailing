@@ -28,6 +28,20 @@ function requiredEnv(name: string): string {
 const STORE_NAME = "booking-photos";
 const BUCKET = "booking-photos";
 
+// Mirrors EXT_CONTENT_TYPE in src/lib/booking-photos.ts. Duplicated here
+// instead of imported so this one-shot script avoids pulling in
+// supabaseAdmin and other module-level side effects.
+const EXT_CONTENT_TYPE: Record<string, string> = {
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp",
+  gif: "image/gif",
+  heic: "image/heic",
+  heif: "image/heif",
+  avif: "image/avif",
+};
+
 async function main() {
   const netlify = getStore({
     name: STORE_NAME,
@@ -58,21 +72,20 @@ async function main() {
         continue;
       }
       const ext = key.split(".").pop()?.toLowerCase() ?? "";
-      const contentType =
-        ext === "jpg" || ext === "jpeg"
-          ? "image/jpeg"
-          : ext === "png"
-            ? "image/png"
-            : ext === "webp"
-              ? "image/webp"
-              : "application/octet-stream";
+      const contentType = EXT_CONTENT_TYPE[ext] ?? "application/octet-stream";
 
       const { error } = await supabase.storage
         .from(BUCKET)
         .upload(key, buf, { contentType, upsert: false });
       if (error) {
-        // Supabase returns this error message when a key already exists.
-        if (error.message.includes("already exists")) {
+        // Supabase storage returns `name: "Duplicate"` / statusCode 409 when the
+        // object already exists. Fall back to the message substring in case the
+        // SDK changes the error shape.
+        const isDuplicate =
+          (error as { name?: string }).name === "Duplicate" ||
+          (error as { statusCode?: string }).statusCode === "409" ||
+          error.message.includes("already exists");
+        if (isDuplicate) {
           skipped++;
           continue;
         }
