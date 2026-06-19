@@ -13,7 +13,7 @@ vi.mock("@/lib/cms/settings", () => ({
   getSetting: vi.fn().mockResolvedValue("Recent detail"),
 }));
 
-function createMockChain(data: any[] | null, error: any = null) {
+function createMockChain(data: unknown[] | null, error: unknown = null) {
   const order = vi.fn().mockResolvedValue({ data, error });
   const eq = vi.fn(() => ({ order }));
   const select = vi.fn(() => ({ eq }));

@@ -31,20 +31,23 @@ export default function TestimonialsManager({
 }) {
   const [state, action, pending] = useActionState(createTestimonial, initialState);
   const [items, setItems] = useState(testimonials);
-  const [success, setSuccess] = useState(false);
+  const [dismissedState, setDismissedState] = useState<TestimonialActionState | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
   const [, start] = useTransition();
 
+  const success =
+    !!state && "ok" in state && state.ok && dismissedState !== state;
+
   useEffect(() => {
-    if (state && "ok" in state && state.ok) {
-      setSuccess(true);
+    if (state && "ok" in state && state.ok && dismissedState !== state) {
+      const captured = state as TestimonialActionState;
       formRef.current?.reset();
       router.refresh();
-      const timer = setTimeout(() => setSuccess(false), 3000);
+      const timer = setTimeout(() => setDismissedState(captured), 3000);
       return () => clearTimeout(timer);
     }
-  }, [state, router]);
+  }, [state, router, dismissedState]);
 
   const move = (index: number, dir: -1 | 1) => {
     const next = index + dir;

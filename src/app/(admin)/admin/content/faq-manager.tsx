@@ -30,20 +30,23 @@ export default function FaqManager({
 }) {
   const [state, action, pending] = useActionState(createFaqItem, initialState);
   const [items, setItems] = useState(faqItems);
-  const [success, setSuccess] = useState(false);
+  const [dismissedState, setDismissedState] = useState<FaqActionState | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
   const [, start] = useTransition();
 
+  const success =
+    !!state && "ok" in state && state.ok && dismissedState !== state;
+
   useEffect(() => {
-    if (state && "ok" in state && state.ok) {
-      setSuccess(true);
+    if (state && "ok" in state && state.ok && dismissedState !== state) {
+      const captured = state as FaqActionState;
       formRef.current?.reset();
       router.refresh();
-      const timer = setTimeout(() => setSuccess(false), 3000);
+      const timer = setTimeout(() => setDismissedState(captured), 3000);
       return () => clearTimeout(timer);
     }
-  }, [state, router]);
+  }, [state, router, dismissedState]);
 
   const move = (index: number, dir: -1 | 1) => {
     const next = index + dir;

@@ -50,7 +50,7 @@ import { sendBookingEmail } from "@/lib/send-booking-email";
 import { logger } from "@/lib/logger";
 
 let ipCounter = 1;
-function createMockRequest(body: Record<string, any>, ip?: string) {
+function createMockRequest(body: Record<string, unknown>, ip?: string) {
   const finalIp = ip || `192.168.2.${ipCounter++}`;
   const formData = new FormData();
   

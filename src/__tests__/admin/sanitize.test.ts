@@ -155,8 +155,8 @@ describe("sanitizeHtml - XSS Prevention", () => {
     });
 
     it("should handle null/undefined gracefully", () => {
-      expect(sanitizeHtml(null as any)).toBe("");
-      expect(sanitizeHtml(undefined as any)).toBe("");
+      expect(sanitizeHtml(null as unknown as string)).toBe("");
+      expect(sanitizeHtml(undefined as unknown as string)).toBe("");
     });
 
     it("should handle whitespace-only strings", () => {
