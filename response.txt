@@ -1,0 +1,1 @@
+{"error":"validation","fieldErrors":{"service":["Select a service"],"year":["Invalid input"],"make":["Invalid input"],"model":["Invalid input"],"color":["Invalid input"],"address":["Invalid input"],"city":["Invalid input"],"zip":["Invalid input"],"date":["Invalid input"],"timeWindow":["Pick a time window"],"phone":["Invalid input"]}}

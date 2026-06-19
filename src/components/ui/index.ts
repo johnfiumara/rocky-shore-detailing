@@ -6,7 +6,6 @@ export { FormField } from "./form-field";
 export { Input, type InputProps } from "./input";
 export { Textarea, type TextareaProps } from "./textarea";
 export { RadioCard, type RadioCardProps } from "./radio-card";
-export { Badge } from "./badge";
 export { Card } from "./card";
 export { SectionHeader } from "./section-header";
 export { EmptyState } from "./empty-state";

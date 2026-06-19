@@ -4,7 +4,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import type { z } from "zod";
 import {
   type BookingInput,
@@ -18,7 +18,6 @@ import { VehicleStep } from "@/components/booking/steps/vehicle-step";
 import { WhenStep } from "@/components/booking/steps/when-step";
 import { PhotosStep } from "@/components/booking/steps/photos-step";
 import Reveal from "@/components/reveal";
-import type { CustomerSummary, RebookPayload, VehicleSummary } from "./types";
 
 type BookingFormInput = z.input<typeof bookingSchema>;
 
@@ -30,65 +29,32 @@ const STEP_FIELDS: Record<Step, (keyof BookingFormInput)[]> = {
   2: ["name", "email", "phone", "notes"],
 };
 
-export function BookingSectionClient({
-  customer,
-  vehicles,
-  rebook,
-}: {
-  customer: CustomerSummary | null;
-  vehicles: VehicleSummary[];
-  rebook: RebookPayload | null;
-}) {
-  const isSignedIn = !!customer;
+const WEB3FORMS_ENDPOINT = "https://api.web3forms.com/submit";
+const WEB3FORMS_KEY = process.env.NEXT_PUBLIC_WEB3FORMS_KEY ?? "";
 
-  const defaultVehicleId = useMemo(() => {
-    if (rebook?.vehicle) {
-      const saved = vehicles.find((v) => v.id === rebook.vehicle.id);
-      if (saved) return saved.id;
-      return "new";
-    }
-    const def = vehicles.find((v) => v.isDefault);
-    return def?.id ?? (vehicles[0]?.id || "new");
-  }, [vehicles, rebook]);
+const DEFAULT_VALUES: BookingFormInput = {
+  service: "full-package",
+  year: undefined,
+  make: "",
+  model: "",
+  color: "",
+  address: "",
+  city: "",
+  zip: "",
+  date: "",
+  timeWindow: "morning",
+  name: "",
+  email: "",
+  phone: "",
+  notes: "",
+};
 
-  const [selectedVehicleId, setSelectedVehicleId] = useState<string | "new">(
-    defaultVehicleId,
-  );
-
-  const defaultValues: BookingFormInput = useMemo(() => {
-    const service =
-      rebook?.serviceSlug &&
-      (SERVICE_SLUGS as readonly string[]).includes(rebook.serviceSlug)
-        ? rebook.serviceSlug
-        : "full-package";
-
-    return {
-      service: service as BookingFormInput["service"],
-      year: rebook?.vehicle?.year ?? undefined,
-      make: rebook?.vehicle?.make ?? "",
-      model: rebook?.vehicle?.model ?? "",
-      color: rebook?.vehicle?.color ?? "",
-      address: customer?.address ?? "",
-      city: customer?.city ?? "",
-      zip: customer?.zip ?? "",
-      date: "",
-      timeWindow: "morning",
-      name: customer?.name ?? "",
-      email: customer?.email ?? "",
-      phone: customer?.phone ?? "",
-      notes: "",
-    };
-  }, [customer, rebook]);
-
+export function BookingSectionClient() {
   const methods = useForm<BookingFormInput, unknown, BookingInput>({
     resolver: zodResolver(bookingSchema),
     mode: "onTouched",
-    defaultValues,
+    defaultValues: DEFAULT_VALUES,
   });
-
-  useEffect(() => {
-    methods.reset(defaultValues);
-  }, [defaultValues, methods]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -117,28 +83,42 @@ export function BookingSectionClient({
   const onBack = () => setStep((s) => Math.max(0, s - 1) as Step);
 
   const onSubmit = methods.handleSubmit(async (data) => {
+    if (!WEB3FORMS_KEY) {
+      setSubmitState("error");
+      setServerError(
+        "Booking form isn't configured yet. Please call or email — see footer.",
+      );
+      return;
+    }
+
     setSubmitState("submitting");
     setServerError(null);
+
     const fd = new FormData();
+    // Web3Forms metadata fields.
+    fd.append("access_key", WEB3FORMS_KEY);
+    fd.append("subject", `New booking request — ${data.name}`);
+    fd.append("from_name", "Rocky Coast Detailing booking form");
+    fd.append("replyto", data.email);
+
     (Object.entries(data) as [string, unknown][]).forEach(([k, v]) => {
       if (v !== undefined && v !== null) fd.append(k, String(v));
     });
-    files.forEach((f) => fd.append("photos", f));
+    files.forEach((f) => fd.append(`photo_${f.name}`, f));
 
     try {
-      const res = await fetch("/api/booking", { method: "POST", body: fd });
-      if (res.ok) {
+      const res = await fetch(WEB3FORMS_ENDPOINT, {
+        method: "POST",
+        body: fd,
+      });
+      const body = (await res.json().catch(() => ({}))) as { success?: boolean; message?: string };
+      if (res.ok && body.success !== false) {
         setSubmittedName(data.name);
         setSubmitState("ok");
         return;
       }
-      const body = await res.json().catch(() => ({}));
       setSubmitState("error");
-      setServerError(
-        body?.error === "validation"
-          ? "Some fields need fixing."
-          : "Couldn't send right now.",
-      );
+      setServerError(body.message ?? "Couldn't send right now.");
     } catch {
       setSubmitState("error");
       setServerError("Network issue — please try again or call.");
@@ -193,14 +173,7 @@ export function BookingSectionClient({
                       ease: [0.22, 0.7, 0.2, 1],
                     }}
                   >
-                    {step === 0 && (
-                      <VehicleStep
-                        vehicles={vehicles}
-                        selectedId={selectedVehicleId}
-                        onSelect={setSelectedVehicleId}
-                        isSignedIn={isSignedIn}
-                      />
-                    )}
+                    {step === 0 && <VehicleStep />}
                     {step === 1 && <WhenStep />}
                     {step === 2 && (
                       <PhotosStep
@@ -208,8 +181,6 @@ export function BookingSectionClient({
                         onFilesChange={setFiles}
                         filesError={filesError}
                         setFilesError={setFilesError}
-                        isSignedIn={isSignedIn}
-                        customer={customer}
                       />
                     )}
                   </motion.div>

@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE "Booking" ADD COLUMN IF NOT EXISTS "photos" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[];

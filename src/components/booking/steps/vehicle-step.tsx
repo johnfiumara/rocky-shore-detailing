@@ -1,24 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import { services } from "@/data/services";
 import { FormField, Input, RadioCard } from "@/components/ui";
-import { VehicleSelect } from "@/components/booking/vehicle-select";
 import type { BookingInput } from "@/lib/booking-schema";
-import type { VehicleSummary } from "@/components/booking/types";
 
-export function VehicleStep({
-  vehicles,
-  selectedId,
-  onSelect,
-  isSignedIn,
-}: {
-  vehicles: VehicleSummary[];
-  selectedId: string | "new";
-  onSelect: (id: string | "new") => void;
-  isSignedIn: boolean;
-}) {
+export function VehicleStep() {
   const {
     register,
     formState: { errors },
@@ -27,16 +14,6 @@ export function VehicleStep({
   } = useFormContext<BookingInput>();
 
   const selectedService = watch("service");
-
-  useEffect(() => {
-    const vehicle = vehicles.find((v) => v.id === selectedId);
-    if (vehicle) {
-      setValue("year", vehicle.year, { shouldValidate: true });
-      setValue("make", vehicle.make, { shouldValidate: true });
-      setValue("model", vehicle.model, { shouldValidate: true });
-      setValue("color", vehicle.color, { shouldValidate: true });
-    }
-  }, [selectedId, vehicles, setValue]);
 
   return (
     <div className="space-y-10">
@@ -79,83 +56,62 @@ export function VehicleStep({
         )}
       </fieldset>
 
-      {isSignedIn && vehicles.length > 0 && (
-        <fieldset>
-          <legend className="font-display text-2xl md:text-3xl text-bone mb-6">
-            Choose a vehicle
-          </legend>
-          <VehicleSelect
-            vehicles={vehicles}
-            selectedId={selectedId}
-            onSelect={onSelect}
-            error={
-              errors.year?.message ||
-              errors.make?.message ||
-              errors.model?.message ||
-              errors.color?.message
-            }
+      <fieldset className="grid gap-5 md:grid-cols-4">
+        <legend className="sr-only">Vehicle details</legend>
+        <FormField
+          label="Year"
+          error={errors.year?.message}
+          htmlFor="booking-year"
+        >
+          <Input
+            id="booking-year"
+            type="number"
+            inputMode="numeric"
+            placeholder="2021"
+            error={!!errors.year}
+            {...register("year")}
           />
-        </fieldset>
-      )}
-
-      {(!isSignedIn || selectedId === "new" || vehicles.length === 0) && (
-        <fieldset className="grid gap-5 md:grid-cols-4">
-          <legend className="sr-only">Vehicle details</legend>
-          <FormField
-            label="Year"
-            error={errors.year?.message}
-            htmlFor="booking-year"
-          >
-            <Input
-              id="booking-year"
-              type="number"
-              inputMode="numeric"
-              placeholder="2021"
-              error={!!errors.year}
-              {...register("year")}
-            />
-          </FormField>
-          <FormField
-            label="Make"
-            error={errors.make?.message}
-            htmlFor="booking-make"
-          >
-            <Input
-              id="booking-make"
-              type="text"
-              placeholder="Subaru"
-              error={!!errors.make}
-              {...register("make")}
-            />
-          </FormField>
-          <FormField
-            label="Model"
-            error={errors.model?.message}
-            htmlFor="booking-model"
-          >
-            <Input
-              id="booking-model"
-              type="text"
-              placeholder="Outback"
-              error={!!errors.model}
-              {...register("model")}
-            />
-          </FormField>
-          <FormField
-            label="Color"
-            error={errors.color?.message}
-            htmlFor="booking-color"
-          >
-            <Input
-              id="booking-color"
-              type="text"
-              placeholder="Magnetite Gray"
-              error={!!errors.color}
-              {...register("color")}
-            />
-          </FormField>
-        </fieldset>
-      )}
+        </FormField>
+        <FormField
+          label="Make"
+          error={errors.make?.message}
+          htmlFor="booking-make"
+        >
+          <Input
+            id="booking-make"
+            type="text"
+            placeholder="Subaru"
+            error={!!errors.make}
+            {...register("make")}
+          />
+        </FormField>
+        <FormField
+          label="Model"
+          error={errors.model?.message}
+          htmlFor="booking-model"
+        >
+          <Input
+            id="booking-model"
+            type="text"
+            placeholder="Outback"
+            error={!!errors.model}
+            {...register("model")}
+          />
+        </FormField>
+        <FormField
+          label="Color"
+          error={errors.color?.message}
+          htmlFor="booking-color"
+        >
+          <Input
+            id="booking-color"
+            type="text"
+            placeholder="Magnetite Gray"
+            error={!!errors.color}
+            {...register("color")}
+          />
+        </FormField>
+      </fieldset>
     </div>
   );
 }
