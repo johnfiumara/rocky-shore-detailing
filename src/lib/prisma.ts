@@ -3,24 +3,35 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 
 function createClient() {
-  const databaseUrl = process.env.DATABASE_URL;
+  // Vercel's Supabase/Neon Marketplace integrations inject POSTGRES_PRISMA_URL
+  // (Prisma-tuned pooled URL) and POSTGRES_URL. Prefer those when present so
+  // the integration is the single source of truth; fall back to DATABASE_URL
+  // for local dev and non-Vercel deploys.
+  const databaseUrl =
+    process.env.POSTGRES_PRISMA_URL ||
+    process.env.POSTGRES_URL ||
+    process.env.DATABASE_URL;
 
-  // Validate that DATABASE_URL uses a pooled connection for serverless environments.
-  // Pooled connections prevent connection exhaustion on cold starts.
-  if (databaseUrl) {
-    const hasPooledConnection =
-      databaseUrl.includes("-pooler") || // Neon pooler
-      databaseUrl.includes(":6543"); // Supabase pooled port
+  if (!databaseUrl) {
+    throw new Error(
+      "[prisma] No database URL set (checked POSTGRES_PRISMA_URL, POSTGRES_URL, DATABASE_URL)"
+    );
+  }
 
-    if (!hasPooledConnection) {
-      console.warn(
-        "[prisma] WARNING: DATABASE_URL does not appear to use a pooled connection. " +
-          "Serverless environments (Vercel, etc.) may exhaust connections on cold starts. " +
-          "Consider using Neon (-pooler suffix) or Supabase port 6543 instead of 5432."
-      );
-    }
-  } else {
-    throw new Error("[prisma] DATABASE_URL environment variable is not set");
+  // Pooled-connection check: integration-supplied URLs are pre-pooled, so we
+  // only nag when a user-set DATABASE_URL points at a direct connection.
+  const hasPooledConnection =
+    databaseUrl.includes("-pooler") || // Neon pooler
+    databaseUrl.includes(".pooler.") || // Supabase pooler host
+    databaseUrl.includes(":6543") || // Supabase pooled port
+    databaseUrl.includes("pgbouncer=true"); // Explicit pgbouncer flag
+
+  if (!hasPooledConnection) {
+    console.warn(
+      "[prisma] WARNING: database URL does not appear to use a pooled connection. " +
+        "Serverless environments (Vercel, etc.) may exhaust connections on cold starts. " +
+        "Use Neon (-pooler suffix) or Supabase pooler/port 6543 instead of 5432."
+    );
   }
 
   const pool = new Pool({ connectionString: databaseUrl });
