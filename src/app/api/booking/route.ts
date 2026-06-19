@@ -3,9 +3,7 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { bookingSchema, validateFiles } from "@/lib/booking-schema";
 import { sendBookingEmail } from "@/lib/send-booking-email";
-import { storeBookingPhotos } from "@/lib/booking-photos";
 import { prisma } from "@/lib/prisma";
-import type { Booking } from "@prisma/client";
 import { logger } from "@/lib/logger";
 import { supabaseServer } from "@/lib/supabase/server";
 

@@ -36,7 +36,7 @@ const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 // Use a Proxy to lazily initialize the Prisma client only when it is actually accessed.
 // This prevents build-time failures when DATABASE_URL is not set but code is being compiled or statically analyzed.
 export const prisma = new Proxy<PrismaClient>({} as PrismaClient, {
-  get(target, prop, receiver) {
+  get(_target, prop) {
     if (!globalForPrisma.prisma) {
       globalForPrisma.prisma = createClient();
     }
