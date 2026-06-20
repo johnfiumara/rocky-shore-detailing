@@ -1,20 +1,18 @@
-import { getSettings } from "@/lib/cms/settings";
 import { Mail, Phone } from "lucide-react";
 
-export default async function Footer() {
-  const year = new Date().getFullYear();
-  const settings = await getSettings();
+const PHONE = "(207) 555-0100";
+const EMAIL = "hello@rockycoastdetailing.net";
+const INSTAGRAM = "@rockycoast";
+const HOURS = {
+  weekday: "Mon – Fri · 8a – 6p",
+  saturday: "Saturday · 9a – 4p",
+  sunday: "Sunday · by appointment",
+};
+const TAGLINE =
+  "Mobile auto detailing by Aiden Quinn. From Kittery to Madawaska — we bring the studio to your driveway.";
 
-  const phone = (settings["contact.phone"] as string) ?? "(207) 555-0100";
-  const email = (settings["contact.email"] as string) ?? "hello@rockycoastdetailing.net";
-  const instagram = (settings["contact.instagram"] as string) ?? "@rockycoast";
-  const hours = (settings["contact.hours"] as Record<string, string>) ?? {
-    weekday: "Mon – Fri · 8a – 6p",
-    saturday: "Saturday · 9a – 4p",
-    sunday: "Sunday · by appointment",
-  };
-  const tagline = (settings["site.tagline"] as string) ??
-    "Mobile auto detailing by Aiden Quinn. From Kittery to Madawaska — we bring the studio to your driveway.";
+export default function Footer() {
+  const year = new Date().getFullYear();
 
   return (
     <footer id="contact" className="relative border-t border-line">
@@ -22,16 +20,16 @@ export default async function Footer() {
         <div className="grid gap-16 md:grid-cols-12">
           <div className="md:col-span-6">
             <p className="font-display text-bone text-3xl md:text-4xl max-w-md leading-tight">
-              {tagline}
+              {TAGLINE}
             </p>
             <div className="mt-10 flex flex-wrap gap-4">
-              <a href={`tel:${phone.replace(/\D/g, "")}`} className="btn-ghost text-sm flex items-center gap-2">
+              <a href={`tel:${PHONE.replace(/\D/g, "")}`} className="btn-ghost text-sm flex items-center gap-2">
                 <Phone size={14} />
-                {phone}
+                {PHONE}
               </a>
-              <a href={`mailto:${email}`} className="btn-ghost text-sm flex items-center gap-2">
+              <a href={`mailto:${EMAIL}`} className="btn-ghost text-sm flex items-center gap-2">
                 <Mail size={14} />
-                {email}
+                {EMAIL}
               </a>
             </div>
           </div>
@@ -42,9 +40,9 @@ export default async function Footer() {
                 Hours
               </p>
               <ul className="space-y-1 text-sm text-bone">
-                <li>{hours.weekday}</li>
-                <li>{hours.saturday}</li>
-                <li>{hours.sunday}</li>
+                <li>{HOURS.weekday}</li>
+                <li>{HOURS.saturday}</li>
+                <li>{HOURS.sunday}</li>
               </ul>
             </div>
             <div>
@@ -52,13 +50,13 @@ export default async function Footer() {
                 Social
               </p>
               <a
-                href={`https://instagram.com/${instagram.replace(/^@/, "")}`}
+                href={`https://instagram.com/${INSTAGRAM.replace(/^@/, "")}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sm text-bone hover:text-bronze transition-colors flex items-center gap-2"
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
-                {instagram}
+                {INSTAGRAM}
               </a>
             </div>
           </div>
@@ -76,6 +74,3 @@ export default async function Footer() {
     </footer>
   );
 }
-
-
-

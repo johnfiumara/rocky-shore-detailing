@@ -1,0 +1,10 @@
+.next
+out
+build
+node_modules
+coverage
+.netlify
+package-lock.json
+prisma/migrations
+supabase/.temp
+public

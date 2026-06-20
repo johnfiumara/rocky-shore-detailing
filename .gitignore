@@ -48,8 +48,8 @@ next-env.d.ts
 .next.zip
 deno.lock
 
-# Prisma
-prisma/*.db
-prisma/*.db-journal
-
-.vercel
+# Local test/debug scratch files
+cookies.txt
+response.txt
+admin_body.txt
+.cursor/

@@ -27,8 +27,8 @@ const TestimonialsSection = dynamic(
 
 const BookingSection = dynamic(
   () =>
-    import("@/components/booking/booking-section-server").then(
-      (mod) => mod.BookingSectionServer,
+    import("@/components/booking/booking-section-client").then(
+      (mod) => mod.BookingSectionClient,
     ),
   { loading: () => <BookingSkeleton />, ssr: true },
 );
@@ -38,13 +38,7 @@ const FaqSection = dynamic(() => import("@/components/faq-section"), {
   ssr: true,
 });
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: Promise<{ rebook?: string }>;
-}) {
-  const { rebook } = await searchParams;
-
+export default function Page() {
   return (
     <>
       <Hero />
@@ -53,7 +47,7 @@ export default async function Page({
       <ProcessSection />
       <GallerySection />
       <TestimonialsSection />
-      <BookingSection rebookId={rebook} />
+      <BookingSection />
       <FaqSection />
     </>
   );
